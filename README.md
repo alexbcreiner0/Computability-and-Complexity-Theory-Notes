@@ -1,1 +1,1 @@
-# Computability-and-Complexity-Theory-Notes
+# Computability and Complexity Theory Notes
