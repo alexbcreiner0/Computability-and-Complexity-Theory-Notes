@@ -1,0 +1,218 @@
+\section{Measures of Complexity}
+\par With all of this in mind, we will now give the two axioms which define all valid measures of complexity. Note that this definition is independent of a computational model. We do this by talking about partial recursive functions rather than Turing machines. 
+\begin{definition}
+    Let $\{\phi_i\}$ be an admissible numbering of the partial recursive functions. A \textbf{complexity measure} is an associated set of partial recursive functions $\{\Phi_i\}$, which we interpret to measure some kind of resource use. That is to say, for an input $n$ to $\phi_i$, $\Phi_i(n)$ measures the amount of resources used by $\phi_i$ in computing it's output. A complexity measure is required to satisfy the following two axioms:
+    \begin{enumerate}
+        \item $\phi_i(n) \neq \nearrow \iff \Phi_i(n) \neq \nearrow$
+        \item The function
+        \[ M(i,n,m) = \begin{cases}
+                          1 & \textrm{ if $\Phi_i(n)=m$} \\
+                          0 & \textrm{ else}
+                      \end{cases}\]
+        is \textit{total} recursive
+    \end{enumerate}
+\end{definition}
+\par The first axiom says that the complexity measure is only defined when the function itself is well defined, which should practically go without saying. The second axiom says that computing whether or not the amount of resources used on a computation is a certain number ($m$) is itself a computable function, and something which can always be computed regardless of whether or not the function is defined. For instance, if a Turing machine fails to halt, I can still have a universal Turing machine simulate it and halt when it counts the steps and finds that the number of steps exceeds something specific.
+\par By defining a complexity measure this way, we have something which is independent of the model of computation used. The admissible numbering $\{\phi_i\}$ that we used to enumerate the partial recursive functions was \textit{built out of} the Turing machine model, and any other model of computation which is Turing complete could in a similar way be used to define a different numbering. Because an admissible numbering of partial computable functions has an intrinsic connection to the machines or programs which compute them, we have a definition which, despite being machine independent, applies directly to whatever machines are being considered, and not to the functions themselves. To illustrate this, $\phi_i$ and $\phi_j$ might be the same function. The same function appears in the numbering twice because the indices $i$ and $j$ correspond to two different Turing machines which compute that function, likely with different resource costs. Our definition requires that there be two different functions $\Phi_i$ and $\Phi_j$ to calculate these costs. 
+\par There are some nice general results about all complexity measures which follow from these axioms. However, at this point in the development of the field, they are being called into question as \textit{the} axioms, as there are currently some things which should be complexity measures, such as the number of random coin flips in a probabilistic computation, which are not complexity measures under the Blum axioms. Not only that, we'll see that even forcing space to be a valid complexity measure under these axioms is rather contrived. Apparently at one point Blum himself once gave a talk in which he defined a complexity measure which the audience pointed out wasn't a valid complexity measure under his own axioms. Despite all of this, the axioms come off as seeming extremely innocent, and despite needing some revising, are probably on the right track in their goals.
+
+\begin{fact}
+    The time required by a Turing machine is a valid complexity measure.
+\end{fact}
+\begin{proof}
+    Let $\{\phi_i\}$ be the admissible numbering that we defined via Turing machines earlier. Then $\Phi_i(x)$ is the time required by the $i^{th}$ Turing machine on input $x$. This is clearly partial recursive, as we can have a universal Turing machine simulate $M_i(x)$ while counting the steps, and clearly the first axiom is satisfied. Likewise, the function $M$ is total recursive, by virtue of the fact that we can have our UTM just halt in rejection as soon as $M_i(x)$ exceeds $m$ steps, or halts prior to that.
+\end{proof}
+We now define the most pivotal complexity class in the theory:
+\begin{definition}
+\[ \textbf{P} = \bigcup_{k=1}^\infty \textbf{TIME($n^k$)} \]
+\end{definition}
+For now, we view \textbf{P} as the class of problems which are efficiently solvable by an algorithm. Note that this almost certainly isn't \textit{exactly} what the class is, and in fact it probably can't even be assumed that the class of efficiently solvable problems is contained inside of \textbf{P}. What \textit{can} be agreed upon is that \textbf{P} is going to house the \textit{vast} majority of such problems. \textbf{P} is to complexity theory as \textbf{R} is to broader computability theory - a theoretical pivoting point which everything else will revolve around. There are some more time classes which are worth defining here, for perspectives sake. 
+\begin{definition}
+\[ \textbf{EXP} =  \bigcup_{k=1}^\infty \textbf{TIME($2^{n^k}$) } \]
+\end{definition}
+It should be clear that \textbf{P} $\subseteq$ \textbf{EXP}: For any $k$, $n^k \in O(2^n)$, so \textbf{TIME}$(n^k) \subseteq $\textbf{TIME}$(2^n)$. So in fact \textbf{P} $\subseteq \textbf{TIME}(2^n)$, let alone all of \textbf{EXP}. 
+We can go further still:
+\begin{align}
+    \textbf{2EXP} := \bigcup_{k=1}^{\infty} \textbf{TIME($2^{2^{n^k}}$)}
+\end{align}
+Analogously, we can define a hierarchy \textbf{3EXP}, \textbf{4EXP}, and so forth. We will see shortly that all of these containments are strict, creating a hierarchy of time classes. Finally, define
+\begin{definition}
+    \[ \textbf{ELEMENTARY} = \bigcup_{k=1}^{\infty}\textbf{kEXP} \]
+\end{definition}
+It might feel like we've "climbed to the top" in the sense that we have anything which is computable at any speed. In fact, we don't even have all of \textbf{PR}, let alone \textbf{R}. To see this, consider the tetration operation:
+\begin{align}
+    ^na = a[4]n = a^{a^{a^{.^{.^{.^{a}}}}}}
+\end{align}
+I.e. $^na$ is 'repeated exponentiation', with $a$ raised to itself $n$ times. We can define the "tetranential function' analogously to the exponential function:
+   \[ t_2(n) = {}^n2 = 2^{2^{2^{.^{.^{.^{2}}}}}} \leftarrow \textrm{ n times }\]
+Compare this with the functions
+   \[ e_2(n) = 2^n \]
+   \[ 2e_2(n) = 2^{2^n} \]
+   \[ 3e_2(n) = 2^{2^{2^n}} \]
+And it becomes clear that $t_2(n)$ outgrows all of these functions extremely quickly. In other words, $ke_2(n) \in o({}^n2)$ for all $k$. Note that the tetration operation is clearly PRIM. We will use this operation to prove later that \textbf{ELEMENTARY} is proper in \textbf{PR}. For now though, we can at least be sure from this observation that \textbf{ELEMENTARY} $\subseteq \textbf{PR}$. We would also like to confirm that \textbf{PR} is proper in \textbf{R}. Before that, however, let's turn to defining another type of resource - space complexity.
+
+\begin{center}
+	Henceforth, unless otherwise stated, the Turing machine model used to define all time and space complexity classes will be fixed to be a single string, bidirectional machine with input/output, over the alphabet $\{0,1,\sqcup,\triangleright\}$. If we are only talking about decision problems, the output string will be unused and ignored.
+\end{center}
+We will show shortly that the big and important complexity classes would be the same \textit{regardless of the specific type of Turing machine used}, so this is almost entirely just convention.
+\begin{fact}
+	The space required by a Turing machine is a valid complexity measure.
+\end{fact}
+\begin{proof}
+	We need to actually be careful to force things to work properly here. Specifically, we need to address the fact that a machine might never halt, but instead just move it's cursor back and forth between two positions. In this case, the space used is finite, so $\Phi_i(n) \neq \nearrow$, yet $\phi_i(n) = \nearrow$. To address this, we will be more specific and define
+	\begin{align}
+		\Phi_i(n) = \begin{cases}
+						\textrm{The max distance that the work tape cursor travels} \\ \textrm{in the computation of $i^{th}$ Turing machine on $n^{th}$ string} & \textrm{if } \phi_i(x) \neq \nearrow \\
+						\nearrow & \textrm{else }
+					\end{cases}
+	\end{align}
+	Clearly now this at least satisfies the first axiom. Now we need to show that deciding if the $i^{th}$ machine uses $m$ much space on the $n^{th}$ input is computable. Clearly, we can simulate $M_i(x_n)$ on a UTM, and have it halt and reject if the cursor ever moves too far out. We can also have it halt and accept if the machine completes it's computation without having the cursor position exceed $m$. What is not at all immediately clear is how to reject if the machine stays within $m$ tape cells, but never halts. Wouldn't being able to answer this equate to solving the halting problem? The answer is no, and the reason why is going to be an important observation to make going forward. To formalize the argument requires us to talk about the configuration graph of a machine, which we will hold off on for now. The essential idea though is that given an explicit space bound, \textit{the maximum number of unique configurations that the machine can enter into becomes finite.} We will count these later, but for now, just noting that it finite is enough. 
+	\par With this observation, we augment our universal Turing machine with an extra string of tape, which keeps track of the configurations that the simulated machine $M_i(x_n)$ enters into with each step. Suppose that the machine enters the same (non-halting) configuration twice. Then we can be sure that the machine is never going to halt - it is only going to repeat everything it just did, again and again. In this case, we of course halt and reject. This addresses the case that the machine never halts, but stays within the desired space bound. $M(i,n,m)$ is decidable, so space is a valid complexity measure.
+\end{proof}
+Two of the three most important space classes can now be defined:
+\begin{definition}
+\[ \textbf{L} = \textbf{SPACE($\log(n)$)} \]
+\[ \textbf{PSPACE} = \bigcup_{k=1}^\infty \textbf{SPACE($n^k$)} \]
+\end{definition}
+By Fact 2.1 we can immediately see that \textbf{P} $\subseteq$ \textbf{PSPACE}.
+Now, to conclude this first section, we want to prove what should be the 'easy' proper basic inclusions. It turns out that doing this reasonably requires us to limit the scope of the functions which we are defining our complexity functions over:
+\begin{definition}
+	A function $f:\mathbb{N} \to \mathbb{N}$ is a \textbf{proper complexity function} if it is nondecreasing and there exists a Turing machine which can, in time $O(n+f(n))$, print $O(f(n))$ characters on tape. 
+\end{definition}
+The extra $n$ in the time constraint makes way for functions like $\log(n)$. If $f(n) > n$, then it would of course be impossible to print $f(n)$ many characters in linear time. It is very rare for problems to be decidable in sublinear time, and for this reason, sublinear time classes tend to get ignored. However, logarithmic \textit{space} algorithms are very reasonable to hope for. Nearly every function you can think of is proper complexity, with only very contrived counterexamples. Also obvious is that if $f$ is proper complexity, then so is all of the class $O(f)$. We make one more definition before justifying our attention to these:
+\begin{definition}
+	A Turing machine $M$ is \textbf{precise} if there exists functions $f,g$ such that for all strings $x$ of length $n$, the machine $M$ halts after exactly $f(n)$ steps, and uses exactly $g(n)$ space. (Recall that to say that a machine operates in time/space $h(n)$ is only to make the claim that the resource is \textit{bounded above} by the function $h$ - it is allowed to be smaller and could even be different for different strings of the same length.)
+\end{definition} 
+The following fact is the central appeal of these functions, and applies to the nondeterministic classes as well, by an identical argument, so I will make the claim for all three metrics even though I haven't defined nondeterminism yet.
+\begin{theorem}
+	Let $M$ be a deterministic or nondeterministic Turing machine which decides a language $L$ in time (or space) $f(n)$, where $f$ is a time constructible function. Then there exists a Turing machine $M'$ which also decides $L$, but is also \textbf{precise} deciding the language in time (or space) $g(n)$ for some $g \in O(f(n))$ (This is a very slight lie. If $f$ is a sublinear time bound, then the time required by $M'$ can only be assumed linear as well. Time bounds which are not linear almost make no sense at all though, as it takes at least $|x|$ time to scan the entire input.)
+\end{theorem}
+\begin{proof}
+	The idea is simple as can be - we know that our computation will finish in time (or space) \textit{less than} $f(n)$. Thus if it finishes earlier, or uses less space than it should have, we just waste some extra time or space before finishing, and we can keep track of the amount being used via the definition of a proper complexity function. 
+	\par We'll fill in the details for time. Let $M$ be a Turing machine operating in time $f(n)$ where $f$ is a proper complexity function. Let $M_f$ be the machine which writes $f(n)$ symbols in time $n+f(n)$. The precise machine $M'$ operates by first running the machine $M_f$ to write $f(|x|)$ $1$'s on an extra string of tape in time $O(|x|+f(|x|))$, and then proceeding to run $M(x)$ while using the string of $1$'s as an 'alarm clock', retreating the cursor backward with every step. If $M(x)$ was supposed to halt, but the alarm clock string hasn't reached a blank, it instead keeps going until finding one. Thus, it always takes the same number of steps on an input of length $n = |x|$. The total time used is $c(|x|+f(|x|))+f(|x|) \in O(f(n))$ as long as $f(n) \in O(n)$. Otherwise it can only be assumed in $O(n)$. Note that $c$ only depends on the length of $x$, not $x$ itself, so this machine is precise with respect to time. A very similar argument works for space, and the two constructions can easily be fused together to even obtain a machine precise with respect to both time and space, though this is usually not necessary.  
+\end{proof}
+Maybe sometime in the future I'll look into the following lemma:
+\begin{lemma}
+	There exists a universal Turing machine $U$ (a $1$ string TM with input/output) which operates in time $O(n\log(n))$ and space $O(n)$. What we mean by this is that if a machine $M$ halts on input $x$ in time $T$ using space $S$, then the machine $U$ will halt on input $M;x$ in time $cT\log(T)$ and space $dS$, where $c,d \in \mathbb{N}$ are independent of $x$ and $M$. Furthermore, I think the guy who originally did this proved it was optimal. 
+\end{lemma}
+Now before going into nondeterminism stuff, we show that at the very least, the time and space classes have nontrivial structure. We'll begin with time. We will show what we want to show by defining a 'complexity version' of the halting problem. For a proper complexity function $f(n)$, define 
+\begin{align}
+	H_f := \{M;x: \textrm{$M$ accepts $x$ within $f(|x|)$ steps.} \}
+\end{align}
+So this is the 'truncated' version of the halting problem in which, instead of asking if the machine halts at all, we are instead just asking if it halts within some fixed amount of time. Note that this problem is only solvable in time proportional to the most efficient known universal Turing machine. It is also only solvable given that $f$ is a proper complexity function. To see this clearly, let's design a machine which decides $H_f$. On input pair $M;x$, we first run the machine $M_f(|x|)$ to write out $f(|x|)$ many $1$'s on an ancillary 'alarm clock' string, taking time $O(|x|+f(|x|))$. Then, on a separate string, we have a UTM simulate $M;x$, in such a way that for every collection of steps which correspond to one 'actual' step of $M$, we move the cursor of the alarm clock string backward by a cell. The computation halts if either the computation of $M(x)$ halts, or the cursor of the alarm clock string sees a blank tape cell. This is a $2$ tape machine with input/output which has runtime $O(n+f(n)+f(n)\log(f(n)))$, i.e. $O(f(n)\log(f(n)))$ as long as $n \in O(f(n))$. At this point, I think that every textbook and article in existence disagrees and is confused. Everyone seems to overlook that this is a $2$ tape machine, and our fixed model in complexity theory is \textit{single tape machines}. Unless there is a tricky way to collapse this machine to only need a single string, the default overhead in doing so would bring the complexity of our solution to $O((f(n)\log(f(n)))^2)$. Papadimitrious claims that the best possible bound is $O(f(n)\log^2(f(n))$, wikipedia and the big book claims it is simple $O(f(n)\log(f(n))$, nothing squared at all. I am going to guess that Papadimitrious is the more correct one here, but since all I can currently see is the largest bound $O((f(n)\log(f(n)))^2)$, I'm going to go with this. So, $H_f \in \textbf{TIME($f(n)\log(f(n))$)}$.
+\par For the sake of obtaining a nicer looking and more useful theorem, we will instead pick a proper complexity function $g$ such that $(f(n)\log(f(n)))^2 \in o(g(n))$, i.e. a $g$ which grows much faster than this. Note then that for a machine $M$ running in time $f(n)$, running a UTM for $cg(|x|)$ steps for some $c$ independent of $x$ would equate to deciding if $x \in H_f$. Thus $H_f \in \textbf{TIME($g(n)$)}$. What we show next is that, just as the halting problem was easily in \textbf{RE} but could not be in \textbf{R}, we will show that $H_f$ cannot be in $\textbf{TIME($f(n)$)}$. Note that the proof is nearly identical, just with a few extra arguments about growth rates.
+\begin{theorem}[The Time Hierarchy Theorem]
+	Let $f,g$ be proper complexity functions such that \[ (f(n)\log(f(n)))^2 \in o(g(n)) \]. Then \textbf{TIME}$(f(n))$ is \textit{properly} contained in \textbf{TIME}$(g(n))$.
+\end{theorem} 
+\begin{proof}
+	Let $f,g$ be as above. We design a machine $D$ as follows: On input $x$, $D$ runs the Turing machine coded by the string $x$ on input x, for $g(|x|)$ steps \textit{of the simulation}. This is \textit{as opposed} to simulating $g(|x|)$ steps of the $x(x)$ itself, which would be a much larger number! If, within $g(|x|)$ steps, the simulated machine halts and \textit{rejects}, then we have $D$ \textit{accept} $x$. Otherwise, if the simulated machine accepts within $g(|x|)$ steps or doesn't halt, we \textit{reject}. Note that $D$ halts within $g(n)$ steps on all inputs, and so it decides a language, call it $L(D)$. Clearly, $L(D) \in \textbf{TIME}(g(n))$. 
+	\par Suppose by way of contradiction that $L(D) \in \textbf{TIME}(f(n))$, i.e. there exists a machine $M$ which decides $L(D)$ in time $cf(n)$ for some constant $c$ independent of input length. 
+	Now, let $M_{H_{cf}}$ be the machine which decides $H_{cf}$. This machine operates in time $c'cf(n)\log(f(n))$ where $c'$ is another constant not depending on input length. 
+	Now, by hypothesis, there must exist an $n_0 \in \mathbb{N}$ such that for all $n \geq n_0$, $cf(n) < c'cf(n)\log(f(n)) < g(n)$. Pick a string $x$ which codes the machine $M$ and such that $|x| \geq n_0$. (This can always be done, recall the enumeration theorem or simply note that you can always pad a Turing machine with useless states to have copies of the same machine, functionally.) Consider how $D$ behaves on this input.
+	 If $D$ accepts $x$, then clearly $x \in L(D)$, so $M$ should accept $x$ within $cf(|x|) < g(|x|)$ steps. But by definition of $D$, if $D$ accepts $x$ then the machine coded by $x$, which is $M$, halted in rejection on $x$ within $g(|x|)$ steps. So this is a contradiction. Conversely, if $D$ rejects $x$, then of course $M$ should accept $x$ within $cf(|x|) < g(|x|)$ steps. But this immediately implies that $D(x)$ rejects, so we have the same contradiction. Thus $L(D)$ cannot be in \textbf{TIME}$(f(n))$.
+\end{proof}
+Note that we didn't directly prove $H_f$ wasn't itself in \textbf{TIME}$f(n)$, but this follows immediately, since if it were, then we could use it construct a machine which decides $L(D)$ in time $O(f(n))$, and arrive at the same contradiction. Just to give a concrete example of this theorem, by \textit{my version of it}, \textbf{TIME}$(n)$ is proper in \textbf{TIME}$(n^{2+\epsilon})$ for any $\epsilon > 0$, since it is always the case that $\log(n) \in o(n^{\epsilon})$. So my bound, as rigorous as I could possibly make it, is still pretty much as good as it needs to be. Under the bounds wikipedia claims, it would be proper in \textbf{TIME}$(n^2)$ as well.
+\par We now have some proper containment action for the 'building block' time classes, but what does this say of the bigger classes, \textbf{P} and the gang? At the very least, this theorem serves well towards stratifying most of the 'big' time classes.
+\begin{corollary}
+	\textbf{P} is proper in \textbf{EXP}. Furthermore \textbf{kEXP} is proper in \textbf{k'EXP} for any $k < k'$
+\end{corollary} 
+\begin{proof}
+	For the first claim, note that for any $k \in \mathbb{N}$, $(n^k\log(n^k))^2 = kn^{2k}\log(k) \in o(n^{2k+1}) \subseteq o(2^n)$. Thus \textbf{TIME}$(n^k)$ is proper in \textbf{TIME}$(2^n)$. Also by the time hierarchy theorem, it is clear that \textbf{TIME}$(2^n) \subset \textbf{TIME}(2^{n^2})$, and thus 
+	\[ \bigcup_{k=1}^{\infty} \textbf{TIME}(n^k) \subseteq \textbf{TIME}(2^n) \subset \textbf{TIME}(2^{n^2}) \subseteq \textbf{EXP} \]
+	And so \textbf{P} is proper in \textbf{EXP}. The argument for the rest of the hierarchy is identical.
+\end{proof}
+\par It's worth noting is the role that the property being a proper complexity function played in the proof we just gave. In particular, we can loosen slightly the assumptions about $g$ and $h$, which will make proving proper containment of some of the very big time classes easier:
+\begin{fact}[Slightly Generalized Time Hierarchy Theorem]
+	If $f,g$ are functions such that a Turing machine can write out $g(n)$ many $1$'s in time $h(n)$, and $(f(n)\log(f(n))^2) \in o(h(n)+g(n))$, then \textbf{TIME}$(f(n))$ is proper in \textbf{TIME}$(g(n))$
+\end{fact}
+\begin{proof}
+	Just repeat the original argument and observe that these assumptions are enough to arrive at a contradiction.
+\end{proof}
+With this generalization, we don't have to worry too much about whether or not crazy things like tetration and the Ackerman function are proper complexity functions. In fact, these functions are so damn big and fast growing that the act of squaring them or taking their logarithm is borderline insignificant.  
+\begin{corollary}
+	\textbf{ELEMENTARY} is proper in \textbf{PR}.
+\end{corollary}
+\begin{proof}
+	We make use of the 'tetranential' function $2[2]n = {}^n2$, noting that if $t(n)$ is the time required to print ${}^n2$ many $1$'s, then it is certainly the case for any $k,l$, $(ke_2(n^l)\log(ke_2(n^l)))^2 \in o(t(n)+{}^n2)$ clearly, and so by the slightly generalized time hierarchy theorem we have that \textbf{TIME}$(ke_2(n^l)) \subset \textbf{TIME}({}^n 2)$, and thus
+	\[\textbf{ELEMENTARY} = \bigcup_{k=1}^{\infty}\bigcup_{l=1}^{\infty}\textbf{TIME}(ke_2(n^l)) \subseteq \textbf{TIME}({}^n 2) \subset \textbf{TIME}(2[5]n) \subseteq \textbf{PR}  \]
+That $\textbf{TIME}({}^n2)$ is proper in $\textbf{TIME}(2[5]n)$ is an identical argument to \textbf{TIME}$(ke_2(n^l)) \subset \textbf{TIME}({}^n 2)$, just with ${}^n2$ in place of $(ke_2(n^l))$ and $2[5]n$ in place of ${}^2n$.
+\end{proof}
+It is clear at this point that \textbf{ELEMENTARY} is a horribly named class, because the tetranential function should certainly be regarded as an 'elementary' operation in the same sense that addition, multiplication, and exponentiation are. We've arrived at a fascinating complexity theoretic characterization of the primitive recursive sets:
+\begin{theorem}
+	\[ \textbf{PR} = \bigcup_{k=1}^{\infty}\textbf{TIME}(2[k]n) \]
+\end{theorem}
+\begin{proof}
+	Suppose $L \in \textbf{PR}$. Let $M$ be the Turing machine which decides $L$. Then the runtime of $M$ is a primitive recursive function, and thus must be bounded by a hyperoperator function $2[k]n$. Thus, $L \in \textbf{TIME}(2[k]n)$. 
+	\par For the converse, intuitively the argument goes like this: Knowing the runtime of a machine which decides $L$ allows us to replace the 'while loop' of waiting for the machine to halt with a 'for loop' which counts up to the time bound. If the time bound is primitive recursive, then we can primitive recursively compute it on ancillary string in unary (i.e. write out that many $1$'s), and use the string as an alarm clock. A more technical argument using the equivalence between Turing machines and
+	\par Actually, if $L \in \textbf{TIME}(2[k]n)$ for some $k$. Let $M$ be the Turing machine which decides $L$, but instead of halting in acceptance/rejection, instead have it output $0$ or $1$ with only a single halting state, so that $\chi_L(\langle x \rangle) = M(\langle x \rangle)$. Then there is a $\Delta_1$ relation $S(n,m)$ so that $L(n) \iff \exists m S(n,m)$, and $m$ represents the number of steps of the machine $m$. But if this is the case, then the existential quantifier can be replaced with a bounded quantifier, i.e. define $L'$ by
+	 \[ (n,k) \in L' \iff k = g(n) \wedge \exists m \leq k [S(n,m)] \]
+Clearly $L'$ is the conjunction of two $\Delta_0$ formulas, so it is $\Delta_0$, i.e. primitive recursive. Then $n \in L \iff (n,g(n)) \in L'$. Thus $ \chi_L(n) = \chi_{L'}(n,g(n))$ is the composition of two primitive recursive functions, i.e. primitive recursive. 
+\end{proof}
+This is a very pretty result, but it also finalizes the promise that \textbf{PR} is exactly what we thought it was - the class of problems solvable by algorithms without using a while loop. If there is a function which is computable without using while loops which bounds the duration of a while loop, then we can replace it with a for loop, and the while loop was unnecessary. That is effectively the argument we made in the context of Turing machines, and it works in all other contexts by the Church Turing Thesis.
+\par The last proper inclusion we don't have is that \textbf{PR} is proper in \textbf{R}. This is now easy to show.
+\begin{corollary}
+	\textbf{PR} is proper in \textbf{R}.
+\end{corollary}
+\begin{proof}
+	Let $A$ be the Ackerman function. Note that identical arguments to those given several times already show us that, say, $\textbf{TIME}(A(n,n)) \subset \textbf{TIME}(2^{A(n,n)})$. Now for any $k$, identical arguments give that $\textbf{TIME}(2[k]n) \subset \textbf{TIME}(A(n,n))$, and so
+	\[\textbf{PR} = \bigcup_{k=0}^{\infty} \textbf{TIME}(2[k]n) \subseteq \textbf{TIME}(A(n,n)) \subset \textbf{TIME}(2^{A(n,n)}) \subseteq \textbf{R} \]
+So \textbf{PR} is proper in \textbf{R}.
+\end{proof}
+Henceforth, all time and space classes will be assumed to be based on proper complexity functions. We turn to the space hierarchy theorem. As before, we will define a space bounded version of the halting problem: 
+	\[ H^s_f = \{M;x : M \textrm{accepts $x$ within $f(|x|)$ space} \} \]
+It would nice if we could say without any justification that this problem is clearly decidable in space $O(f(n))$. While it is true that we have a universal Turing machine that can simulate $M(x)$ keeping track of space use at the same time makes things complicated. Recall that in showing that space was a valid complexity measure, we were able to decide when our computation didn't halt in the allotted space by keeping track of the configurations, but we did this in a haphazard way, not taking any regard towards the actual time or space used by the machine simulating that process. We need to make sure that we can do \textit{the simulating itself} with minimal space overhead. With enough time, this is possible. But to get to seeing that, we need to count the total number of configurations more carefully. We're also going to need a very small lemma:
+\begin{lemma}
+	Suppose $f(n)$ is a proper complexity function with $n \in O(f(n))$. Then for any constants $a,b$, $a2^{bf(n)}$ is also a proper complexity function, and in fact we can write out this many $1$'s on an ancillary tape string in space $O(f(n))$.
+\end{lemma}
+\begin{proof}
+	It suffices to show that we can write out $2^{f(n)}$ many $1$'s, ignoring the extra constants. First, using that $f(n)$ is proper complexity, we have a machine write out this many $1$'s using $O(f(n))$ space. The machine then converts this number into $k$-ary, where $k$ is the size of the machine's alphabet (this is always at least $2$). Note that the number of symbols now used to represent $f(n)$ is $O(\log(f(n))$. We then repeat this, and add the resulting number to $f(n)$, giving us $2f(n)$, and incrementing a binary counter. We continue doing this - computing $f(n)$ in $k$-ary and adding it to what was there before, until reaching a point where our binary counter is a string of $n$ ones, corresponding to having done this $2^n$ times. The final result written on the tape string is $O(\log(2^{f(n)}) = O(f(n))$, and we never use more than $O(f(n))$ space during the computation. 
+\end{proof}
+Now, to count. We'll start with some generality, letting $M = (\Sigma,Q,\delta)$, with any number of symbols in it's alphabet, and any number of work tape strings, say $k-1$ of them (so $k$ total). 
+\par For all space bounds, we will assume that $\log(n) \in O(f(n))$. Let $c_x$ be some initial configuration. We want to count the total number of configurations which can possibly be yielded by $c_x$ while staying within space $f(|x|)$. We defined a standard representation of configurations earlier, but for our purposes now we will assume that configurations have the form
+\[ c=(i,u_2,v_2,u_3,v_3,...,u_k,v_k,q) \]
+Where $u_i;v_i$ is the string on the $i^{th}$ tape, with the cursor position being the dividing line; the last symbol of $u_i$ will be taken to be the current cursor position, with $v_i$ everything after. Of course, by the space boundedness, $|u_i| \leq f(|x|)$ for each $i$. We don't need the tape contents for the first string - they will always be the same string. Instead all we need is the cursor position, $i$, with $1 \leq i \leq n$. Finally, $q$ is the state. Now we count the total number of configurations that there are. For any string $i>1$, there are $|\Sigma|$ total symbols per cell and $f(|x|)$ possible cells filled nontrivially, so $|\Sigma|^{f(|x|)}$ many strings for each $u_i,v_i$ (of which there are $2(k-1)$ many). Of course, $i$ ranges from $1$ to $|x|$, and $|Q|$ possible states.
+Thus, the maximum number of configurations which could be reachable by $c_x$ for an $f(n)$ space bounded machine, where $n=|x|$, is
+\begin{align}
+n|Q||\Sigma|^{2(k-1)f(n)} = |Q|2^{\log(n)+2\log(|\Sigma|)(k-1)f(n)} \in O(2^{cf(n)})
+\end{align}
+\par Where $c = d + 2(k-1)\log(|\Sigma|)$, and $d$ is a constant such that $\log(n) \leq df(n)$ for all $n$. This bound is unfortunately messy, since there is nothing we can do about the constant $c$. Since we are assuming a standardized model in which we only have a single work string and a $4$ symbol alphabet, our constant is really going to just be $c = d+4$, so it will be completely determined by the function $f(n)$, and how much bigger it is than $\log(n)$. 
+\par Now, finally suppose that we wish to decide if a Turing machine $M$, with $m$ total states, accepts an input $x$ within $f(|x|)$ steps, with $\log(n) \leq (c-4)f(n)$ for a constant $c$, and $f$ a proper complexity function. Suppose that the machine takes more than $m2^{cf(n)}$ many steps in it's computation. Then it cannot possibly accept (or reject) $x$ in space less than or equal to $f(|x|)$, since, assuming it were always within this space bound, it would have to enter into one of it's configurations twice, meaning it would never halt. Thus we decide $H^s_f$ in the following way. The $c$ such that $\log(n) \leq cf(n)$ doesn't depend on input. First, on the primary work string, we move the cursor forward $df(|x|)$ many spaces (where $d$ is the constant space overhead of a simulation by our UTM), not printing anything. This can be done in space $O(f(|x|))$ since $f$ is proper complexity. We then move the cursor forward one more space, and print a special symbol $\sigma$, to be used nowhere else in the computation, before moving the cursor all of the way back to where it started. Next, on a separate alarm clock string, print $|M|2^{cf(n)}$ many $1$'s, for the sake of counting down in the usual way. This can be done in space $O(f(|x|))$ by our lemma. Finally, with the setup complete, we utilize our UTM simulation of $f(|x|)$. With every simulated step of $M(|x|)$, we move the alarm clock cursor left. If the alarm clock cursor ever encounters a blank, then $M(|x|)$ either fails to halt or it uses too much space, so we reject. If the cursor on the worktape ever encounters the special symbol $\sigma$, then $M(|x|)$ has used too much space, so we reject. Otherwise, we reject or accept just as $M(|x|)$ would. Clearly our machine decides $H^s_f$, and does so in $O(f(n))$ space, as desired.
+\begin{corollary}
+	$H^s_f \in \textbf{SPACE}(f(n))$
+\end{corollary}
+\begin{proof}
+	Read what's above this. What the hell do you think corollary means?
+\end{proof}
+Now as before with the time hierarchy theorem, we our proof won't use $H^s_f$ directly, but rather a negated, single variable version of it.
+\begin{theorem}[Space Hierarchy Theorem]
+	For any proper complexity functions $f,g$ $\log(n) \in O(f(n)),O(g(n))$, with $f(n) \in o(g(n))$, \textbf{SPACE}$(f(n))$ is proper in \textbf{SPACE}$(g(n))$
+\end{theorem}
+\begin{proof}
+ 	Define the machine $D$ which, on an input $x$, simulates the machine $x$ on input $x$ in $g(|x|)$ space, in the way identical to the above. If $x(x)$ rejects within this space bound, we have $D(x)$ accept. Else, we have $D(x)$ reject. 
+ 	\par Suppose $L(D) \in \textbf{SPACE}(f(n))$. Let $M$ be the machine which decides $L(D)$ in space $cf(n)$. Let $c'$ be the constant space efficiency loss of simulating a Turing machine, and let $n_0$ be such that for all $n \geq n_0$, $c'cf(n) < g(n)$. Pick a string $x$ coding $M$ which is of length greater than or equal to $n_0$, and consider $D(x)$. If $D$ accepts, then $x \in L(D)$, but since $M$ decides $L(D)$, it should follow that $x(x) = M(x)$ should halt in rejection within $g(x)$ space. But $M$ decides $L(D)$, so this is a contradiction. If $D$ rejects, then $x \notin L(D)$, i.e. $x(x)$ either fails to halt within space $g(n)$ or time $2^{g(n)}$ or accepts. The first and third case contradict $M$ deciding $L(D)$ in space $f(n)$ however. Thus, no machine $M$ can possibly decide $L(D)$ in space $f(n) \in o(g(n))$.
+\end{proof}
+Next we turn to two theorems which apply to general Blum complexity measures - and thus to both time and space. The gap theorem points out why it is important to restrict our attention to proper complexity measures.
+\begin{theorem}[The Gap Theorem]
+	Let $\Phi$ be a complexity measure. Then for any total computable function $g:\mathbb{N} \to \mathbb{N}$ with $n \leq g(n)$ for all $n$, there is a total computable function $f:\mathbb{N} \to \mathbb{N}$ such that the complexity classes with boundary functions $f(n)$ and $g(f(n))$ are identical.
+\end{theorem}
+The $g$ stands for gap. As an example, fix the time measure, and let $g(n) = 2^n$. Then the gap theorem says that there exists a really dumb yet totally computable as heck function $f(n)$ such that 
+\[ \textbf{TIME}(f(n)) = \textbf{TIME}(2^{f(n)}) \]
+Obviously, this would contradict the time hierarchy theorem if $f$ were proper complexity, but there was no such assumption being made by the gap theorem. Note that the gap theorem also doesn't imply anything weird going on inside of the 'robust' classes we've defined like \textbf{P} or \textbf{PSPACE}. For instance, the gap theorem implies that there exists a function $f$ such that $\textbf{TIME}(f(n)) = \textbf{TIME}((f(n))^2)$. However, this function $f$ is \textit{necessarily} extremely fast growing - faster than any polynomial. Since, for any polynomial degree $k$, it is obviously true that for any function $h \in O(n^{2k})$, we would of course have that $\textbf{TIME}(h(n)) \subseteq \textbf{TIME}(n^{2k})$, regardless of whether or not $h$ is even proper complexity.
+\begin{proof}
+	todo
+\end{proof}
+\iffalse
+\begin{theorem}[The Speedup Theorem]
+    Fix a computational resource satisfying the Blum axioms. Then for any total recursive function $g$, there exists a decision problem $L$ which has the property that if $M$ is any Turing machine which decides $L$, then resources required by $M$ on an input $n$ will exceed $g(n)$ for infinitely many inputs $n$.
+\end{lemma}
+\begin{proof}
+    We are given the function $g$, and we must define the function $f$. We define the value of $f$ on input $n$ by running the $n^{th}$ Turing machine $M_n$ on input $n$. If $M_n(n)$ halts in $\leq g(n)$ steps, then define $f$ by
+    \[ f(n) = \begin{cases}
+                  0 & \textrm{ if $M_n(n) \neq 0$} \\
+                  1 & \textrm{ else}
+              \end{cases} \]
+    If it takes any more than $g(n)$ steps, then we just set $M_n(n) = 0$. This defines $f$.
+    \par Clearly $f$ is recursive - just compute it's value by running $M_n(n)$ and what happens. Since $M$ is recursive, it must have a corresponding index $m$ in our admissible list of Turing machines $\{M_m\}$. On this index, $M(m)$ must take more than $g(n)$ steps, since otherwise $M(m) = f(m) \neq M_m(m) = M(m)$. Furthermore, every Turing machine shows up in our admissible numbering infinitely many times, so it must be the case that the time required by $M$ exceeds $g(n)$ for infinitely many inputs. 
+\end{proof}
+\fi
+

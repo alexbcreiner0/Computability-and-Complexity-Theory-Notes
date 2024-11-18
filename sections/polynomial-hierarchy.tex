@@ -1,0 +1,200 @@
+\section{The Polynomial Hierarchy}
+\par Yet another point of confusion is the fact the next class we should define which is absolutely NOT the same class as $\textbf{NP} \cap \textbf{coNP}$:
+\begin{definition}
+    $\textbf{DP} := \{L_1 \cap L_2: L_1 \in \textbf{NP}, L_2 \in \textbf{coNP}\}$
+\end{definition}
+\textbf{DP} is in fact likely much bigger. For an example of a \textbf{DP} problem, consider
+\begin{problem}
+    SAT-UNSAT: Given two Boolean expressions $\phi$ and $\phi'$, is it the case that $\phi$ is satisfiable and $\neg\phi$ is not?
+\end{problem}
+\begin{theorem}
+    SAT-UNSAT is \textbf{DP} complete:
+\end{theorem}
+\begin{proof}
+    First, we show that SAT-UNSAT $\in \textbf{DP}$. To do this, let $L_1 \in \textbf{NP}$, $L_2 \in \textbf{coNP}$ such that SAT-UNSAT $= L_1 \cap L_2$. Define $L_1 := \{(\phi,\phi': \phi \textrm{ is satisfiable} \}$, and $L_2 := \{(\phi,\phi'): \phi' \textrm{ is unsatisfiable} \}$. Clearly $L_1$ reduces to SAT, and $L_2$ reduces to $SAT^c$, (the reductions are just the projection functions of the first and second coordinates respectively) so $L_1 \in \textbf{NP}$, $L_2 \in \textbf{coNP}$, and SAT-UNSAT $= L_1 \cap L_2 \in \textbf{DP}$. 
+    \par To show hardness, let $L = L_1 \cap L_2 \in \textbf{DP}$. Let $R_1$ and $R_2$ be reductions from $L_1$ to $SAT$, and $L_2$ to $SAT^c$, respectively. Then the function $R(x) = (R_1(x),R_2(x))$ is clearly also computable in logarithmic space, and furthermore 
+    \begin{align}
+        x \in L &\iff x \in L_1 \wedge x \in L_2 \\
+                &\iff R_1(x) \in SAT \wedge R_2(x) \in SAT^c \\
+                &\iff R(x) \in SAT-UNSAT
+    \end{align}
+\end{proof}
+Now, consider the following: A boolean expression $\phi in SAT$ iff $(\phi,\neg \phi) \in SAT-UNSAT$. Therefore $SAT$ is reducible to $SAT-UNSAT$, and so \textbf{NP} $\subseteq$ \textbf{DP}. The same argument goes for \textbf{coNP}. Thus, we have the following easy to show yet slightly subtle, not so slightly confusing, and very possibly trivial chain of inclusions:
+\begin{align}
+    \textbf{P} \subseteq \textbf{NP} \cap \textbf{coNP} \subseteq \textbf{NP} \cup \textbf{coNP} \subseteq \textbf{DP}
+\end{align}
+%Should define function problems farther up, and put this there%
+A classic and well known problem which is central to complexity theory and computer science at large is the \textit{travelling salesman problem}. The actual problem is this:
+\begin{problem}
+    TSP: Given a collection of 'cities' $V=\{1,2,...,n\}$ and a collection of 'costs' $\{d_{i,j}:1 \leq i,j \leq n\}$, what permutation $\sigma$ of $V$ has the lowest total cost? That is to say, what permutation $\sigma$ has the property that $\sum_{i=1}^{n} d_{\sigma(i),\sigma(i+1)}$ is least?
+\end{problem}
+Note that since the sum goes up to $n$ and not $n-1$, the idea is that we are visiting every city once, and in such a way where we finish back where we started. We call such a circuitous path a \textbf{tour}, and refer to the sum above as the tour's \textbf{cost}. We will also take the distances to be given as a matrix, which we refer to as the \textbf{distance matrix}. Since we can assume that the distance matrix is square, we may assume the number of cities from the size of the matrix, so $V$ is not needed as part of the input. We will hereby use the words tour and permutation interchangeably. Note that this is a function problem, not a decision problem! Second, as a function problem, our abuse of the word function is already in full swing, as the tour which is shortest is by no means unique.
+TSP is a complex problem, more complicated than the previous problems we've looked at. To analyze it, we will need to look at some variations on it.
+\begin{problem} 
+    TSP(D): Given a distance matrix $[d_{ij}]$, as well as a 'budget' $B$, is there a tour of the cities of total cost less than or equal to $B$?
+\end{problem}
+\begin{problem}
+    EXACT TSP: Given a distance matrix $[d_{ij}]$, and an integer $B$, is the minimum cost of a tour \textit{equal} to B?
+\end{problem}
+\begin{problem}
+    TSP COST: Given a distance matrix $[d_{ij}]$, what is the minimal cost of a tour?
+\end{problem}
+A few things should be noted immediately. Firstly that the first two of these variations are decision problems, while the last is a function problem. Secondly, TSP(D) is clearly in $\textbf{NP}$, since given a tour, we can quickly and easily confirm that it's cost is less than a particular budget. (It is in fact \textbf{NP} complete, which we'll show a bit later.) Thirdly, TSP(D) can clearly be reduced to EXACT TSP, since if we \textit{did} know that the shortest path was some length $S$, then given a budget $B$, we would only need to check to see if $B < S$, rejecting if so, and accepting if not. Fourthly, EXACT TSP can clearly be reduced to TSP COST: Just compute the minimum cost and check if it's the thing which was inputted. Lastly, TSP COST is clearly reducible to TSP, since given the minimal cost path, we can simply add the distances together to compute the cost.
+Thus, we have four versions of the travelling salesmen, which are in ascending in difficulty:
+\begin{align}
+    \textrm{TSP(D)} \leq \textrm{EXACT TSP} \leq \textrm{TSP COST} \leq \textrm{TSP}
+\end{align}
+\par What is \textit{not} at all obvious is the relationship between TSP(D) and EXACT TSP, or where to place the latter. It's strangely mesmerizing to take a moment and realize that there are no obvious receipts for this problem! EXACT TSP is not at all obviously an \textbf{NP} problem!
+\par What the heck is it then? Well, before we answer this let's consider the problem TSP$^c \in \textbf{coNP}$. Note that
+\begin{align}
+    ([d_{ij}],B) \in TSP^c &\iff \neg(\textrm{There exists a tour of cost } \leq B) \\
+            &\iff \textrm{\textit{all} tours are of cost } > B
+\end{align}
+Of course, we could easily have defined TSP(D) to be in terms of $<$ and not $\leq$, and it would still be \textbf{NP}, so in an abuse of notation we will temporarily pretend we did that temporarily when we speak of TSP(D)$^c$, so that we can say that 
+\[ ([d_{ij}],B) \in TSP^c \iff \textrm{all tours are of cost at least $B$} \]
+Thus, we note that to say that all tours have cost at least B \textit{and} that there exist a tour of cost less than or equal to B is \textit{equivalent} to saying that the minimal cost of a tour is \textit{exactly} B. i.e. 
+\begin{align}
+    ([d_{ij}],B) \in \textrm{EXACT TSP} &\iff ([d_{ij}],B) \in TSP(D) \wedge ([d_{ij}],B) \in TSP(D)^c
+\end{align}
+Thus, we have shown that EXACT TSP $\in$ \textbf{DP}. In fact, we will later show that it is \textbf{DP} complete.
+\par This is a big result, for the following reason: Suppose it were the case that EXACT TSP were in \textbf{NP}. Then all problems in \textbf{DP} would reduce to it, so it would be the case that $\textbf{DP} = \textbf{NP}$, in which case $\textbf{NP} \cup \textbf{coNP} \subseteq \textbf{DP} = \textbf{NP}$, so then we would have that $\textbf{coNP} = \textbf{NP}$, a claim which is as widely believed to be false as $\textbf{P}=\textbf{NP}$. Thus, EXACT TSP is \textit{very} likely a fundamentally harder problem than TSP(D), and since EXACT TSP reduces to the big boy TSP, we've shown that it is \textit{very} likely the case that TSP is fundamentally harder than TSP(D), and is thus \textit{very} unlikely to be in the class which you might at first expect it to be, \textbf{FNP}!
+\par What abstract property of EXACT TSP makes it (probably) harder than TSP(D)? The answer is the desired 'just right-ness' of a solution. We need to confirm not just that something works, but that it is, in a sense, perfect: not too big, and not too small. In other worse, in looking at \textbf{DP} we have stumbled into the world of decision problems in which we desire not just any solution, but one which is \textit{optimal}. To hammer the point in, here are a couple of SAT variants which can be shown to be \textbf{DP} complete:
+\begin{problem}
+    CRITICAL SAT: Given a Boolean expression $\phi$ in 3-CNF, is it the case that $\phi$ is unsatisfiable, but removing any single clause from the expression makes it satisfiable?
+\end{problem}
+See what I mean?
+We next turn to oracles and oracle Turing machines. Oracles are essentially the mathematics equivalent of the 'what-if machine' from Futurama. The idea is to think about how the theory changes in a world where certain kinds of computation are 'easy' or 'cheap'. We can model this in complexity theory by considering a reality where a specific decision problem $L$ is trivialized: All answers to the question $x \in L$? are decidable in a single step. We make this formal below:
+\begin{definition}
+    Let $L$ be a language. An \textbf{oracle Turing machine} $M^L$, read aloud as 'M \textit{relativized} to L', or if you're lazy, 'M raised to L', is a multi-string deterministic Turing machine M equipped with a special string called the \textbf{query string}, and three special states: the \textbf{query state} $q_?$, as well as two \textbf{answer states} $q_{no}$ and $q_{yes}$. (not to be confused with the halting states!)
+    \par $M^L$ behaves identically to a regular Turing machine except for when it enters the query state $q_?$, upon which it will always enter in the next step one of the two answer states. Let $x$ be the string contents of the query string. Then $M^L$ transitions to $q_{yes}$ if $x \in L$, and $q_{no}$ if $x \notin L$. It can then continue it's computation contingent on the answer to it's query. Time complexity is defined identically to before, so 'queries to the oracle' consume exactly one time step. Nondeterministic machines can be defined in the obviously analogous way. Space complexity becomes a bit complicated apparently, and I'll come back here and fix up the definition for that later. If \textbf{C} is a complexity class, then we can define \textbf{C}$^L$ to be the class of languages decidable by Turing machines satisfying the same constraints as the original class, but with all Turing machines assumed relativized to L. Ergo \textbf{C}$^L$ is precicely the class \textbf{C}, but in a world in which answers to $L$ are computationally 'cheap'.
+\end{definition}
+The idea behind the notation is that we've taken a class and 'embued it with extra power', in particular the power to instantly answer a particular question. Thus $\textbf{C}^L$ which one intuitively reads aloud as '\textbf{C} to the power of $L$' is exactly what it sounds like - we've raised it's power by whatever power is implicit to what can be reduced to L.
+\par And reductions are precisely where oracle machines become interesting. Suppose our oracle language is SAT. By giving a Turing machine an oracle for SAT, we've in fact made much more than just SAT cheap - we've made every problem in \textbf{NP} cheap! Thus, for instance, when we write $\textbf{P}^{\textbf{NP}}$, we are really referring to $\textbf{P}^{SAT}$, and when we write down a class 'raised to the power' of another class, we are intuitively referring to the class in which problems from the exponent class have been made trivial, and precisely we are referring to the class relativized to an oracle for some complete problem in the exponent class. Which one is irrelevant, and can be changed up as it's convenient.
+Note immediately that answers given by oracles are given in the \textit{deterministic} sense: Yes if the answer is yes, no if the answer is no. Thus, for example, there is no distinction \textbf{P}$^{\textbf{NP}}$ and \textbf{P}$^{\textbf{coNP}}$.
+
+%INSERT RESULTS ABOUT DIAGONALIZATION RESULTS RELATIVIZING TO ORACLES AS A GENERAL RULE%
+
+\par In the context of oracles, the class \textbf{DP} can be thought of in a simple way: It is precisely the class of problems which can be solved by making two calls to an oracle for SAT, and accepting if and only if the first query results in a yes, and the second results in a no. For instance, our \textbf{DP} algorithm for EXACT TSP first asks if there is a tours of cost at most B, and then asks if there are of cost at most B-1, and accepts iff the first answer is yes, and the second is no. Both of these questions can easily by way of reduction be converted into queries to SAT. 
+\par This viewpoint gives way to a completely new kind of complexity-theoretic resource: \textit{query complexity}. We can see \textbf{DP} as a starting point. Problems solvable by a constant $O(1)$ number of queries to SAT. What if we allowed a number of queries which scaled with the input length, just like time or space? That is precisely what we get when we consider the class \textbf{P}$^{\textbf{NP}}$ - the class of languages which can be solved with a polynomial number of queries to SAT. We can define \textbf{FP}$^{\textbf{NP}}$ similarly, and this gives us our natural home for the big boy TSP problem:
+\begin{fact}
+    TSP $\in \textbf{FP}^{\textbf{NP}}$ 
+\end{fact}
+\begin{proof}
+    We assume the fact that TSP(D) is reducible to SAT, and show that we can determine the optimal path using a polynomial number of queries to TSP(D), which we can make cheaply by way of this reduction. Assume numbers are given in binary, and let $n$ be the input length. Then the optimum cost is a positive integer which is at most $2^n$. (This is actually worse than the worst case, since it can only be achieved where the cost of all but a single transition is 0, but even the 0's would detract from the total length. If there were, say, two nonzero numbers, one of length a and the other of length b, then just note that $2^a + 2^b \leq 2^{a+b} = 2^n$ to be sufficiently convinced of this upper bound.) Our process is a two parter:
+    \par First, we determine the exact cost of the shortest path. We do this by way of a binary search: We call TSP(D) on our distance matrix $D$ along with the budget $2^{n-1}$. If the answer is yes, we know there is a tour cheaper than or as cheap as that, and so we query again on the budget $2^{n-2}$. If the answer is no, we know that the cheapest tour is more than half the worst case, so we query on the budget $2^{n-1}+2^{n-2}$, and so forth. Eventually, after a linear number of queries, we'll be left querying on the exact minimal tour length, will get two no's in a row, and realize we have the correct number.
+    \par Now, assume we have the exact minimal tour cost $C$. We will finish the problem by making queries to TSP(D) in which the budget is fixed as $C$, but with changes to the distance matrix $D$. In particular, we will one by one take an intercity distance and replace it's cost with $C+1$. If the query result on this edited matrix with budget $C$ is in the affirmative, then we know that the optimal tour doesn't use this in it's travel path, so we freeze the cost as $C+1$. Else, we restore it to it's original cost. Note then that after $O(n^2)$ queries like this, we'll have frozen any intercity distance which are inessential to a minimal cost tour at an unrealistic cost. At this point, we look at the first row of the distance matrix. There's guaranteed to be at least one city to travel to which is of cost less than $C$. We pick it as the first city for our permutation, and move on to that row. Continuing this until we've visited every row, we'll find ourselves an optimal path.
+\end{proof}
+Note that the first part of the proof spells out an algorithm for solving TSP COST, using a linear number of queries, while the solution to the entire problem uses in the worst case a quadratic number of queries. Viewing number of SAT queries as a research, we see exactly how each version of the TSP problem ascends in difficulty: EXACT TSP has \textit{constant} query complexity $O(1)$, TSP COST has \textit{linear} query complexity $O(n)$, and TSP itself has \textit{quadratic} query complexity $O(n^2)$. However, despite only ever needing a quadratic number of queries, the class $\textbf{FP}^{\textbf{NP}}$ still cares about \textit{time} as it's central resource, and in this sense, despite only needing a quadratic number of SAT queries, the algorithm above needs a number of steps which, while a polynomial, could use any fixed degree $k$. The same can be said of TSP COST - despite TSP needing more queries to SAT, in terms of time these problems are the same, and equally serve to characterize the class.
+\begin{theorem}
+    Both TSP and TSP COST are $\textbf{FP}^{\textbf{NP}}$ complete. (But in terms of number of SAT queries, TSP is quadratically harder)
+\end{theorem}
+\begin{proof}
+    to do
+\end{proof}
+%Is this only just O(n^3)? Does this say something about the class collapsing to a specific polynomial bound k?
+To summarize, the notion of query complexity and the class $\textbf{P}^{\textbf{NP}}$ allows us to characterize and properly think about \textbf{optimization} problems - problems which center around finding mathematical expressions which are in some sense minimal or maximal within the constraints of the problem. The classes \textbf{NP}, \textbf{DP}, and $\textbf{P}^{\textbf{NP}}$ all connect to these problems in a fundamental and unique way, escalating in difficulty, and each class relies in some sense on the previous one. \textbf{NP} characterizes our ability to evaluate how close we've gotten \textit{to} an optimal solution. Within this class, we can give proposed budgets and ask if that budget is realistic, given \textit{whatever} the optimal solution happens to be. Within \textbf{DP}, we can take things a step further, offering up a proposed budget and asking if a solution which meets that budget \textit{is} the optimal solution. Finally, within $\textbf{FP}^{\textbf{NP}}$, we can actually compute the optimal budget, or return the optimal object itself. From a standpoint of steps, both tasks are equally difficult, but from a standpoint of our level of reliance on querying, returning the object is slightly more difficult. To some extent, these considerations are inseparable from one another.
+\begin{definition}
+    Let \textbf{C} and \textbf{D} be complexity classes for which . We say that the class \textbf{C} is \textbf{low} for \textbf{D} if $\textbf{D}^{\textbf{C}} = \textbf{D}$
+\end{definition}
+Intuitively, to say that \textbf{C} is low for \textbf{D} is to say that problems in \textbf{C} are \textit{easy} for \textbf{D} - that the computational power of \textbf{D} is a league above that of \textbf{C}. Because of this, to say that a class is low for \textit{itself} is to make a very strong and profound claim of uniformity. Note that if a class is self low, then it must also be self dual - that is - closed under complement. However, being self low is a much stronger notion of uniformity than being closed under compliment. To be self low essentially means that we can run as many 'subroutines' as the resources of our class naturally admit, without escaping the class. To be self low means to be 'closed under subroutines', which is a very naturally appealing property for a complexity class to have, if it is to have any real life significance or practicality. It is for this reason that Scott Aaronson has called classes with this property \textbf{physical complexity classes}.
+\begin{theorem}
+    \textbf{P}, \textbf{L}, \textbf{PSPACE}, \textbf{NP} $\cap$ \textbf{coNP}, \textbf{BPP}, and \textbf{BQP} are all self-low.
+\end{theorem}
+\begin{proof}
+    Suppose $C$ is some \textbf{P} complete language and that L is a language decidable in time $c_1n^{k_1}$ for some $c_2,k_1$ by an oracle Turing machine $M^C$. Let $N$ be a Turing machine deciding C in time $c_2n^{k_2}$ for some $c_2,k_2$. Then consider the nonrelativized Turing machine M' which simulates $M^C$ exactly until $M^C$ enters a $q_?$ state, at which point $M'$ simulates $N$ on the input which is the string written on the query tape, and continues based on that. This machine clearly decides $L$ in worst case time $c_1(c_2n^{k_2})^{k_1} = cn^l$ where $c=c_1c_2^{k_1}$ and $l=k_1k_2$ are constants which are independent of input length. Thus $L \in \textbf{P}$. Similar arguments can be made for \textbf{L} and \textbf{PSPACE}. $\textbf{NP} \cap \textbf{coNP}$. [needs doing still]
+\end{proof}
+\par 
+Note that self-lowness is not at all a common property, and the above list may be about as comprehensive as any list will ever be. \textbf{NP} is not at all obviously self low, and probably isn't, and \textbf{EXP} can easily be confirmed to not be. 
+
+\par Through looking at the travelling salesman problem, we've seen that the class $\textbf{P}^{\textbf{NP}}$ certainly has theoretical significance, and is very likely a much class than either \textbf{P} or \textbf{NP}. However, this leaves a very obvious new class overlooked, since $\textbf{P}^{\textbf{NP}} \subseteq \textbf{NP}^{\textbf{NP}}$! It might look silly but it is clearly no joke. And for that matter, what of $\textbf{co(NP}^{\textbf{NP}})$? In fact, we have an entire hierarchy of classes to look at, defined below:
+\begin{definition}
+    The \textbf{polynomial hierarchy} is the following sequence of classes, defined inductively:
+    \begin{align}
+            \Delta_0^{\textbf{P}} = \Sigma_0^{\textbf{P}} = \Pi_0^{\textbf{P}} = \textbf{P}
+    \end{align}
+    \begin{align}
+         \Delta_{i+1}^{\textbf{P}} = \textbf{P}^{\Sigma_i^{\textbf{P}}}
+    \end{align}
+    \begin{align}
+        \Sigma_{i+1}^{\textbf{P}} = \textbf{NP}^{\Sigma_i^{\textbf{P}}}
+    \end{align}
+    \begin{align}
+        \Pi_{i+1}^{\textbf{P}} = \textbf{coNP}^{\Sigma_i^{\textbf{P}}}
+    \end{align}
+    Finally, we define the \textbf{cumulative polynomial hierarchy} as 
+    \begin{align}
+        \textbf{PH} = \bigcup_{i \in \omega} \Sigma_i^{\textbf{P}}    
+    \end{align}
+\end{definition}
+Of course, this definition is currently mostly broken, as we haven't yet shown that each 'level' of this hierarchy has a complete problem. (Recall what it means to relativize one class to another.) A few of them are though - $\Delta_1^{\textbf{P}} = \textbf{P}$, $\Sigma_1^{\textbf{P}} = \textbf{NP}$, $\Pi_1^{\textbf{P}} = \textbf{coNP}$, $\Delta_2^{\textbf{P}} = \textbf{P}^{\textbf{NP}}$, $\Sigma_2^{\textbf{P}} = \textbf{NP}^{\textbf{NP}}$, and $\Pi_2^{\textbf{P}} = \textbf{co(NP}^{\textbf{NP}})$ are all currently well defined. There is a very natural and pretty hierarchy of generalizations of $SAT$ which we will show to be complete for every level of the hierarchy, inductively making our inductive definition work out (inductively). First though, we will generalize our 'certificates' definition of $\textbf{NP}$ to every level of the hierarchy (inductively):
+\begin{lemma}
+    Let $L$ be a language, and $i \geq 1$. Then $L \in \Sigma_i^{\textbf{P}}$ iff there is a polynomially balanced relation $R \in \Pi_{i-1}^{\textbf{P}}$ such that $x \in L$ iff $\exists y (x,y) \in R$. \\
+    \\
+    (To say $R \in \Pi_{i-1}^{\textbf{P}}$ is really to say $\{x;y: (x,y) \in R\} \in \Pi_{i-1}^{\textbf{P}}$.)
+\end{lemma}
+\begin{proof}
+    The base case $i=1$ is done already: $\Sigma_1^{\textbf{P}} = \textbf{NP}$ and $\Pi_0^{\textbf{P}} = \textbf{P}$, so the statement is simply the 'certificates' definition of $\textbf{NP}$.
+    \par Suppose then $L$ is a language, and that for $i > 1$, such a relation $R \in \Pi_{i-1}^{\textbf{P}}$ exists for $L$. Let $k_1$ be the polynomial degree which balances the relation. We wish to show that $L \in \Sigma_i^{\textbf{P}}$. That is to say, we wish to show there exists a nondeterministic polynomial time Turing machine M equipped with an oracle for $\Sigma_{i-1}^{\textbf{P}}$ which decides $L$. We do this by defining the Turing machine $N^{\Sigma_{i-1}^{\textbf{P}}}$ which, on input $x$, first guesses at a $y$ of length less than or equal to $|x|^{k_1}$, and then checks with the oracle whether $x;y \in R$. (Remember, to say that $R \in \Pi_{i-1}^{\textbf{P}}$ is to say that $R^c \in \Sigma_{i-1}^{\textbf{P}}$, so we can use our oracle to quickly verify whether or not $x;y \notin R$, which is of course equivalent to verifying whether or not $x;y \in R$.) If the oracle answers in the affirmative, then $N^{\Sigma_{i-1}^{\textbf{P}}}$ halts and accepts, else it rejects. Clearly the machine decides $L$ in polynomial time.
+    \par Conversely, suppose $L \in \Sigma_i^{\textbf{P}}$. Let $N^{\Sigma_{i-1}^{\textbf{P}}}$ be the nondeterministic oracle machine which decides it in time $n^k$. Specifically, let $K$ be the $\Sigma_{i-1}^{\textbf{P}}$ complete language which $N$ is relativized to, i.e. really have $N^K$. Now, $K \in \Sigma_{i-1}^{\textbf{P}}$, so by the inductive hypothesis, there exists a relation $S \in \Pi_{i-2}^{\textbf{P}}$ such that $z \in K$ iff $\exists w (z,w) \in S$. What we need is a succint certificate that inputs $x$ are in $L$ which can be verified by a nondeterministic oracle machine $M^{\Sigma_{i-1}^{\textbf{P}}} = M^K$. In the original proof which characterized \textbf{NP}, we used encodings of accepting computational paths as our certificates, and we will do more or less the same thing here. However, many of the steps of $M$'s computation will be oracle calls to $K$, and in order for a $\Pi_{i-1}^{\textbf{P}}$ machine to disqualify invalid paths, it needs to be able to determine whether the encoded computational path 'made the right decision' for each oracle call. To this end, suppose that $y$ is a valid and accepting computational path in $M^K$ on input $x$. Some of the configurations in this string will be in the 'oracle accepts' and 'oracle rejects' states, and these will be accompanied by a string on the oracle tape $z$ which was supposedly queried. Suppose the query returns a yes. Then there is a string $w$ such that $(z,w) \in S$. \textit{our certificate for $x \in L$ will be the encodings of accepting paths in the configuration graph of $M^K$, along with certificates $w_l$ for each $z_l$ which was queried over during the computation, resulting in 'yes' answers from the oracle.} This defines our relation $R$.
+    \par We have several things to verify to make sure our relation $R$ works. First, we can at least be comfortable in knowing that $L = \{x: \exists y (x,y) \in R \}$. Second, we need to show that $R \in \Pi_{i-1}^{\textbf{P}}$ - that is to say, we have to show that a nondeterministic oracle machine $N^{\Sigma_{i-2}^{\textbf{P}}}$ can verify that $(x,y) \notin R$, i.e. it can catch invalid computations of $M^K$, i.e. that there are certificates of inauthenticity for the liar $(x,y)$ pairs. First, we acknowledge that the computational path itself can be verified deterministically in polynomial time. (That is, that the path is valid under the assumption that we blindly accept any answers from the oracle.) Next, we must determine for polynomially many pairs $(z_l,w_l)$ whether $(z_l,w_l) \in S$. Since $S \in \Pi_{i-2}^{\textbf{P}} \subseteq \Delta_{i-1}^{\textbf{P}} \subseteq \Pi_{i-1}^{\textbf{P}}$, this can clearly be verified by a $\Pi_{i-1}^{\textbf{P}}$ machine in polynomial time. Finally, for the strings $z_l'$ which $K$ returned a 'no' on, we need to confirm that $z_l' \notin K$. However, note that since $K \in \Sigma_{i-1}^{\textbf{P}}$, checking that $z_l' \notin K$ is itself a $\Pi_{i-1}^{\textbf{P}}$ question, so inductive hypothesis each of these oracle answers has a certificate verifiable by in bulk by some nondeterministic machine relativized to $\Sigma_{i-2}^{\textbf{P}}$, which we can simulate with our $N$. These three observations result in confirming the existence of a Frankenstein machine which does exactly what we need it to.
+    \par Finally, we note that since $M^K$ operates in polynomial time, computational paths will be polynomial length. Certificates for the worst case polynomially many certificates $w_i$ will be polynomial length by the inductive hypothesis, so in all the strings $y$ will always be polynomial length in $|x|$, when they exist. Thus, we're done.
+\end{proof}
+By the exact same argument we used to create the 'dual' definition of \textbf{coNP}, we have the following corollary for the $\Pi_i^{\textbf{P}}$ classes:
+\begin{corollary}
+    Let $L$ be a language, $i \geq 1$. Then $L \in \Pi_i^{\textbf{P}}$ iff there is a binary relation $R \in \Sigma_{i-1}^{\textbf{P}}$, and an integer $k>0$ such that $x \in L$ iff $\forall y$ with $|y| \leq |x|^k$, $(x,y) \in R$. 
+\end{corollary}
+The above theorem and it's corollary take on their true meaning when only when recursively unpacked. For instance, consider the class $\Sigma_2^{\textbf{P}}$. By the theorem, we know a language $L$ is in this class iff there exists a polynomially balanced binary relation $R_1 \in \Pi_1^{\textbf{P}}$ such that $x \in L$ iff $\exists y_1 (x,y_1) \in R_1$. But since $R_1 \in \Pi_1^{\textbf{P}} = \textbf{coNP}$, there exists a polynomially balanced binary relation $R_2 \in \textbf{P}$ such that $\forall y_2, (x;y_1,y_2) \in R_2$. Define the relation $R$ by $(x,y_1,y_2) \in R \iff (x,y_1) \in R_1 \wedge (x;y_1,y_2) \in R_2$. Then $R$ is polynomially balanced in the sense that both of the $y_i$'s are polynomial in $|x|$, and in fact the $(x,y_1) \in R_1$ clause is superfluous, since this is true iff the second clause is true. Thus $R \in \textbf{P}$, and we have that \[x \in L \iff \exists y_1 \forall y_2 (x,y_1,y_2) \in R \]
+This leaves us with the following extremely important corollary, characterizing all levels of the polynomial hierarchy without any mention of oracles or nondeterminism:
+\begin{theorem}
+    Let $L$ be a language, $i \geq 1$. Then $L \in \Sigma_i^{\textbf{P}}$ iff there exists a polynomially balanced $(i+1)$-ary relation $R \in \textbf{P}$ such that
+    \begin{align}
+        x \in L \iff \exists y_1 \forall y_2 \exists y_3 ... Q y_i(x,y_1,y_2,y_3,...,y_i) \in R
+    \end{align}
+    Where the $i^{th}$ quantifier is $\forall$ if $i$ is even, and $\exists$ if $i$ is odd. \\
+    Similarly, $L \in \Pi_i^{\textbf{P}}$ iff there exists a polynomially balanced $(i+1)$-ary relation $R \in \textbf{P}$ such that
+    \begin{align}
+         x \in L \iff \forall y_1 \exists y_2 \forall y_3 ... Q y_i(x,y_1,y_2,y_3,...,y_i) \in R
+    \end{align}
+    Where the $i^{th}$ quantifier is $\exists$ if $i$ is even, and $\forall$ if $i$ is odd.
+\end{theorem}
+Of course, almost all of this is worthless until we are able to find a complete problem in each class, because otherwise nothing beyond the first two levels of the hierarchy are defined. The keyworld there, however, is almost - the second level is certainly well defined, and we can use the above theorem to prove that an extension of $SAT$ is complete at this level, making the third level well defined. In fact, the next theorem will define a problem complete at every level of the hierarchy, provided that level is well defined, which inductively it will be, allowing us to 'bootstrap' our way all the way up.
+\begin{problem}
+    Define \textit{the quantified satisfiability problem with $i$ alternations} as\\
+    $QSAT_i$: Given a Boolean expression $\phi$ with variables partitioned into $i$ sets $X_1,X_2,...,X_i$, is it true for all partial truth assignments to $X_1$, there exists a partial truth assignment for $X_2$ such that for all partial truth assignments to $X_3$, and so on, up to $X_i$, that $\phi$ is satisfied by the overall truth assignment? We represent instances of $QSAT_i$ with strings of the following form:
+    \begin{align}
+        \exists X_1 \forall X_2 \exists X_3... QX_i \phi
+    \end{align}
+    Where $Q$ is $\exists$ if $i$ even and $\forall$ if $i$ odd.
+\end{problem}
+Of course, there is a symmetric family of problems in which the quantifiers begin with a $\forall$, but we won't bother naming it. One is enough to get the gist.
+\begin{theorem}
+    For all $i \geq 1$, $QSAT_i$ is $\Sigma_i^{\textbf{P}}$ complete.
+\end{theorem}
+\begin{proof}
+    Clearly $QSAT_i \in \Sigma_i^{\textbf{P}}$ by our relation characterization.
+    Let $L \in \Sigma_i^{\textbf{P}}$. WLOG suppose $i$ is odd (the even case is nearly identical.) Then there exists a polynomially balanced $(i+1)$-ary relation $R \in \textbf{P}$ so that $x \in L \iff \exists y_1 \forall y_2 \exists y_3 ... \exists y_i(x,y_1,y_2,y_3,...,y_i) \in R$. Let $M$ be the polynomial time Turing machine which decides if $x;y_1;y_2;....;y_i \in R$. Then, going off of the proof that $SAT$ is \textbf{NP} complete, we can associate with $R$ a Boolean expression $\phi$ which captures the computation of the machine. Each concatenated chunk of the input represents it's own set of Boolean variables appearing in $\phi$, which we can can naturally partition into sets $X,Y_1,Y_2,...,Y_i$, and call them \textit{input variables}.
+    \par So, to summarize, we have for the relation $R$ a Boolean expression $\phi$ and a set of input variables $X,Y_1,Y_2,...,Y_i$ whose values are fixed for each choice of strings $x,y_1,...,y_i$ respectively, such that $\phi$ is satisfied iff the associated string $x;y_1;y_2;...;y_i \in R$. Now, consider a string $x$, and substitute into $\phi$ the associated variables in $X$ those dictated by that string. Then it is clear that $x \in L$ iff there exists a string $y_1$ (associated with a set $Y_1$) such that for all strings $y_2$ (associated with unique sets $Y_2$) such that... such that there exists a string $y_i$ (associated with a set $Y_i$) such that $\phi(X)$. i.e. 
+    \[ x \in L \iff \exists Y_1 \forall Y_2... \exists Y_i \phi(X) \]
+\end{proof}
+It is best to think of instances of $QSAT_i$ as a game between two players. Both players take turns picking assignments to the variables in the set for that specific turn, and player one wins if the final Boolean expression ends up satisfied. Under this guise, the expression $\exists X_1 \forall X_2 \exists X_3... QX_i \phi$ is effectively the statement that player one has a \textit{winning strategy} - that there is something he can do on turn one such that whatever player two chooses to do on the second turn, there is something he can do on the third turn - etcetera. Thus we can see that a problem $L$ is in $\Sigma_i^{\textbf{P}}$ iff for every input $x$, we can define an $i$-turn long game in which $x \in L$ precisely when player 1 has a winning strategy. 
+\begin{theorem}
+    If for any positive integer $i$, we have that $\Sigma_i^{\textbf{P}} = \Pi_i^{\textbf{P}}$, then for all $j > i$, $\Sigma_j^{\textbf{P}} = \Pi_j^{\textbf{P}} = \Delta_j^{\textbf{P}} = \Sigma_i^{\textbf{P}}$
+\end{theorem}
+\begin{proof}
+    Suppose that $\Sigma_i^{\textbf{P}} = \Pi_i^{\textbf{P}}$, and let $L \in \Sigma_{i+1}^{\textbf{P}}$. Then there exists a relation $R \in \Pi_i^{\textbf{P}}$ such that 
+    \[L = \{x: \exists y (x,y) \in R\} \]
+    But, then $R \in \Sigma_i^{\textbf{P}}$ as well, so there must exist a relation $S \in \Pi_{i-1}^{\textbf{P}}$ such that $(x,y) \in R$ iff there is a $z$ so that $(x,y,z) \in S$. But then we have that $x \in L$ iff there exists a string $y;z$ such that $(x,y,z) \in S$, where $S \in \Pi_{i-1}^{\textbf{P}}$, which is equivalent to saying that $L \in \Sigma_i^{\textbf{P}}$. So $\Sigma_{i+1}^{\textbf{P}} \subseteq \Sigma_i^{\textbf{P}}$.
+    But then $\Sigma_{i+1}^{\textbf{P}} = \Sigma_i^{\textbf{P}} \subseteq \Delta_{i+1}^{\textbf{P}}$, but also $\Delta_{i+1}^{\textbf{P}} \subseteq \Sigma_{i+1}^{\textbf{P}}$, so $\Delta_{i+1}^{\textbf{P}} = \Sigma_{i+1}^{\textbf{P}}$. But then $\Pi_{i+1}^{\textbf{P}} = \textbf{co}\Sigma_{i+1}^{\textbf{P}} = \textbf{co}\Delta_{i+1}^{\textbf{P}} = \Delta_{i+1}^{\textbf{P}}$, so $\Delta_{i+1}^{\textbf{P}} = \Sigma_{i+1}^{\textbf{P}} = \Pi_{i+1}^{\textbf{P}}$. By induction we have the statement then for all $j > i$.
+\end{proof}
+As Papadimitrious says in his book \textit{Computational Complexity}: "\textit{As it is built by patiently adding layer after layer, always using the previous layer as an oracle for defining the next, the resulting structure is extremely fragile and delicate. Any jitter, at any level, has disastrous consequences further up.}" It is precisely this delicate naturem however, which gives $\textbf{PH}$ so much theoretical significance. Note that we have the following corollary:
+\begin{corollary}
+    If $\textbf{P} = \textbf{NP}$, then $\textbf{PH} = \textbf{P}$
+\end{corollary}
+This is because we would have $\Pi_1^{\textbf{P}} = \textbf{coNP} = \textbf{coP} = \textbf{P} = \textbf{NP} = \Sigma_1^{\textbf{P}}$ - And so the entire construction we just went through would be meaningless. It appears then that the conjecture that $\textbf{PH}$ is doesn't collapse is a generalization of the conjecture that $\textbf{P} \neq \textbf{NP}$. If we assume that $\textbf{PH}$ doesn't collapse, then out of this more generalized but still believable conjecture we have constructed an extremely delicate house of cards - one which would collapse extremely easily under a host of other possibilities. This will lead us to many other more surprising facts which must be true unless the polynomial hierarchy collapses - new conjectures, and new understanding, in lieu of a lack of real results.
+\begin{fact}
+    $\textbf{PH} \subseteq \textbf{PSPACE}$
+\end{fact}
+\begin{proof}
+    Let $L \in \textbf{PH}$. Then $L$ exists at some finite level of the hierarchy, WLOG suppose $L \in \Sigma_i^{\textbf{P}}$, with $i$ even. Then there is a polynomially balanced and polynomial decidable $(i+1)$-ary  relation $R$ such that $x \in L \iff \exists y_1 \forall y_2 \exists y_3 ... \forall y_i (x,y_1,y_2,...,y_i) \in R$. Let $M_R$ be the Turing machine deciding if $x;y_1;y_2;...;y_i \in R$. Out of $M_R$ we construct a Turing machine operating in polynomial space which decides $L$. Assume we have an ordering to all of the possible strings $y$ of length less than or equal to the polynomial bound on $|x|$. On an input $x$, the machine $M_{\frac{i}{2}}$ runs through all possible poly-bounded length strings $y_i$, making calls to $M_R(x;y_1;y_2;...;y_{i-1};y_i)$, erasing space along the way. If we find a single string $y_i$ such that $M_R$ rejects, we increment the second to last argument, and begin simulating $M_R(x;y_1;y_2;...;y_{i-1};y_i)$. We do this in 'search' of a $y_{i-1}$ such that $M_R$ accepts all of the $y_i$'s. The machine $M_{\frac{i}{2}-1}$ does the exact same thing, sort of. $M_{\frac{i}{2}-1}(x;y_1;y_2;...;y_{i-3};y_{i-2})$ repeatedly makes calls to $M_{\frac{i}{2}}(x;y_1;y_2;...;y_{i-3};y_{i-2};y_{i-1},y_i)$, running through the possible $y_{i-2}$, in search of a fixed $y_{i-3}$ which works for all $y_{i-2}$. We continue building backwords like this, do define machines $M_1, M_2,...,M_{\frac{i}{2}}$, and call $M_1 = M$. A little thought confirms that $M$ decides $L$. The key is to note that even though $M$ performs an incredible amount of simulations of $M_R$, it can recycle the polynomial amount of space used every time, and consistently only use polynomial space throughout the computation.
+\end{proof}
+

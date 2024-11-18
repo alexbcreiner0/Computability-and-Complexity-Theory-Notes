@@ -1,0 +1,247 @@
+\section{Fourier Analysis}
+	From here on we will view Boolean functions as functions $f:\{0,1\}^n \to \{-1,1\}$, and will see the domain of this function as the group $\mathbb{Z}_2^n$, i.e. the product of $n$ many copies of the integers modulo $2$. We are interested in seeing these functions as a special case of functions $f:\mathbb{Z}_2^n \to \mathbb{R}$. These functions clearly form a real inner product space under standard scalar multiplication and function addition, and with the inner product defined by
+	\[ \braket{f,g} := \frac{1}{2^n}\sum_{x \in \mathbb{Z}_2^n} f(x)g(x) \]
+We denote this space $L^2(\mathbb{Z}_2^n)$, because that's what it is. \par 
+Towards defining and understanding the Fourier transform over elements of this space, we need to consider the \textbf{characters} of the group $\mathbb{Z}_2^n$. In general, a character of a group is a homomorphism from the group to the unit circle on the complex plane $S_1$. Many things can and should be noted immediately about this topic, both in general and with regard to our particular group $\mathbb{Z}_2^n$. Firstly note that for any homomorphism $\phi$ from a group to the unit circle, it must be the case that $\phi(x)$ is always a root of unity, since the order of any element of a finite group is finite. In our particular case of $\mathbb{Z}_2^n$, every element has order either $1$ or $2$. Thus homomorphisms of the type we are concerned with must map every element to either $1$ or $-1$. The consequence of this is that the characters of a $\mathbb{Z}_2^n$ are themselves elements of $L^2(\mathbb{Z}_2^n)$, and in fact are Boolean functions. \par 
+We will denote characters of a group with $\chi$. Let us next observe that the characters of $\mathbb{Z}_2^n$ are always orthogonal (as are the characters over any abelian group). Let $\chi_a$ and $\chi_b$ be different characters. Since they're different, there exists an $x \in \mathbb{Z}_2^n$ such that $\chi_a(x) \neq \chi_b(x)$. Let $y \in \mathbb{Z}_2^n$ be arbitrary. Then 
+\begin{align}
+	 \chi_a(y)\braket{\chi_a,\chi_b} &= \frac{1}{2^n}\sum_{x \in \mathbb{Z}_2^n} \chi_a(y)\chi_a(x)\chi_b(x) \\
+	 &= \frac{1}{2^n}\sum_{x \in \mathbb{Z}_2^n} \chi_a(yx)\chi_b(x)
+\end{align}
+Recall that for any $y$ in a group, that $x \mapsto xy$ is always a bijection. So for any $x_1 \in \mathbb{Z}_2^n$, there is a unique $x_2$ so that $x_1 = x_2y$, and subsequently $x_2$ is unique so that $y^{-1}x_1 = x_2$. The point is that for every term in this sum, there is a unique term in the sum
+\[ \sum_{x \in \mathbb{Z}_2^n} \chi_a(x)\chi_b(y^{-1}x) \]
+which is identical. Also obviously $y^{-1} = y$ here, but I'm keeping it somewhat general enough that this argument could be repeated for any finite group. In any case we have then that 
+\[ \chi_a(y)\braket{\chi_a,\chi_b} = \frac{1}{2^n}\sum_{x \in \mathbb{Z}_2^n} \chi_a(yx)\chi_b(x) = \frac{1}{2^n}\sum_{x \in \mathbb{Z}_2^n} \chi_a(x)\chi_b(y)chi_b(x) = \chi_b(y)\braket{\chi_a,\chi_b} \]
+i.e. for any $y \in \mathbb{Z}_2^n$, we have that $\chi_a(y)\braket{\chi_a,\chi_b} = \chi_b(y)\braket{chi_a,\chi_b}$. But since there is a particular $y$ on which we have said that $\chi_a(y) \neq \chi_b(y)$, it must follow that $\braket{\chi_a,\chi_b} = 0$. \par 
+By the obvious isomorphism between functions in $L^2(\mathbb{Z}_2^n)$ and $2^n$ dimensional vectors with entries in $\mathbb{R}$, it is clear that the dimension of this space is exactly $2^n$. It turns out that we can define a collection of just that many characters on $\mathbb{Z}_2^n$ with the assistance of our parity function. 
+\begin{definition}
+	For any $S \subseteq \{1,2,\ldots,n\}$, define the function $\chi_S$ via 
+	\[ \chi_S(x_1x_2\ldots x_n) = \begin{cases} 1 & \textrm{if } \sum_{i \in S} x_i \textrm{ is even} \\
+	-1 & \textrm{if } \sum_{i \in S} x_i \textrm{ is odd} \end{cases}
+	 \]
+	
+\end{definition}
+The sets $S$ can be alternatively viewed as $n$ bit strings where the $i^{th}$ bit is a $0$ or $1$ depending on whether or not $i \in S$. If we see $S$ this way the above definition of $\chi_S$ can be re-expressed as 
+\[ \chi_S(x) = (-1)^{S \cdot x} \]
+where $S \cdot x = \sum_{i=1}^n S_i x_i$.  
+From here on we will use $\oplus$ to denote addition modulo $2$. Note that for a string $x = x_1x_2\ldots x_n$, $\bigoplus_{i=1}^n x_i$ is precisely the parity of $x$. \par 
+Note that the sum in this definition is merely a way to describe taking the parity of the substring whose indexes are specified by $S$. Clearly these are different functions for each $S$. What requires confirmation is the following
+\begin{fact}
+	For each $S$, $\chi_S$ is a character of $\mathbb{Z}_2^n$.
+\end{fact}
+\begin{proof}
+	We need to show that for any two $n$ bit strings $x$ and $y$, that $\chi_S(x \oplus y) = \chi_S(x)\chi_S(y)$ where addition here refers to bitwise addition mod 2. This is much easier to see than it might initially seem. Note that the product $\chi_S(x)\chi_S(y)$ is $1$ iff $\chi_S(x) = \chi_S(y)$, ie iff either $x$ and $y$ both have an even number of $1$'s or both have an odd number of $1$'s. Meanwhile 
+\begin{align} 
+	\chi_S(x+y) &= \begin{cases} 1 & \textrm{if } \bigoplus_{i \in S} (x_i \oplus y_i) = 0  \\
+	-1 & \textrm{if } \bigoplus_{i \in S} (x_i \oplus y_i) = 1  \end{cases} \\
+	&= \begin{cases} 1 & \textrm{if } \bigoplus_{i \in S} x_i + \bigoplus_{i \in S} y_i = 0 \\
+	-1 & \textrm{else} \end{cases} \\
+\end{align}
+In particular we can note here that $\chi_S(x \oplus y)$ is $1$ precisely when the total sum of the $1$'s from both strings is even. But this itself is precisely when either both have an even number of $1$'s or both have an odd number of $1$'s, which is the same condition for being $1$ as that of the product. Thus these functions are the same. 
+\end{proof}
+Since the characters of an abelian group $G$ are always orthogonal in $L^2(G)$, there can only ever be as many of them as the dimension of this space. In this case, we have identified $2^n$ unique characters, and thus this defines all possible characters over $\mathbb{Z}_2^n$. Moreover
+\begin{definition}
+	The characters over $\mathbb{Z}_2^n$ form an orthogonal basis for $L^2(\mathbb{Z}_2^n)$. Thus for any function $f \in L^2(\mathbb{Z}_2^n)$, we can express $f$ in this basis via the formula
+	\[ f(x) = \sum_{S \subseteq \{1,2,\ldots,n\}} \braket{f,\chi_S} \chi_S(x) \]
+Note that $\hat{f}$, as a function of the $S$ sets viewed as $n$-bit strings, is itself a function in $L^2(G)$ - a different one. We call the mapping $\mathcal{F}$ defined by $f \mapsto \hat{f}$ the \textbf{Fourier transform} of $f$. We also call the inner product 
+\[ \hat{f}(S) := \braket{f,\chi_S} = \frac{1}{2^n}\sum_{i \in S} f(x)\chi_S(x) \]
+ The $S^{th}$ \textbf{Fourier coefficient} of $f$. The \textbf{degree} of $f$ is the cardinality of the largest set $S$ such that $\hat{f}(S) \neq 0$. 
+\end{definition}
+The Fourier transform allows us to convert any Boolean function into a polynomial of sorts.
+\begin{definition}
+	A real valued \textbf{multilinear polynomial} is a multivariable function $f(x_1 x_2 \ldots x_n)$ of the form
+	\[ f(x_1 x_2 \ldots x_n) = \sum_{S \subseteq \{1,\ldots,n\}} a_S \prod_{i \in S} x_i \]
+	where $a_S$ is a real number for each $S$.
+\end{definition}
+It is clear that if a function has a multilinear polynomial representation, then that representation is unique, since it is defined by a coefficient $a_S$ for each term, and these terms have no way of mingling or simplifying. To see how the Fourier transform implies a conversion algorithm for any function into a multilinear polynomial, note first that for any single $x_i$, we have
+\[ (-1)^{x_i} = 1-2x_i \]
+Thus given a function $f:\mathbb{Z}_2^n \to \mathbb{R}$, we have
+\begin{align}
+	f(x) &= \sum_{S \in \{0,1\}^n} \hat{f}(S)(-1)^{S \cdot x} \\
+		&= \sum_{S \in \{0,1\}^n} \hat{f}(S)\prod_{i \in S} (1-2x_i)
+\end{align}
+As an example consider the simply $2$-bit Boolean function representing equivalence. That is, $f(x_1 x_2) = (x_1 \iff x_2)$. This function maps $00$ and $11$ to $1$, and $01$ and $10$ to $-1$. This is the same table of inputs and outputs as $\chi_{1,2}$, and thus $f(x_1x_2) = \chi_{1,2}$. But then
+\begin{align}
+	\chi_{1,2}(x_1x_2) = (-1)^{x_1 + x_2} &= (-1)^{x_1}(-1)^{x_2} \\ &= (1-2x_1)(1-2x_2) \\ &= 4x_1x_2 -2x_1 - 2x_2 + 1
+\end{align} 
+Thus 
+\[ (x_1 \iff x_2) \approx 4x_1x_2 -2x_1 - 2x_2 + 1 \]
+The degree here is clearly $2$. 
+\begin{fact}
+	The \textbf{degree} of a function $f: \mathbb{Z}_2^n \to \mathbb{R}$ is the highest number of variables in a term of $f$ expressed as a multilinear polynomial. Equivalently, it is the cardality of the largest $S \subseteq \{1,\ldots,n\}$ such that $\hat{f}(S) \neq 0$.
+\end{fact}
+\begin{proof}
+	Clearly the degree of $\chi_S$ for any $S$ is the cardinality of $S$. By inspection of the Fourier representation of a function, it becomes clear that the degree will be the highest cardinality $S$ such that $\hat{f}(S) \neq 0$. 
+\end{proof}
+\begin{lemma}
+	For a Boolean function $f$ on $n$ bits, consider the probability experiment of drawing an $n$ bit string uniformally at random. Then for any $S \subseteq \{1,\ldots,n\}$,
+	\[ \hat{f}(S) = P\left(f(x) = \bigoplus_{i \in S} x_i \right) - P\left(f(x) \neq \bigoplus_{i \in S} x_i \right) \]
+\end{lemma}
+\begin{proof}
+	Note that $\hat{f}(S) = \frac{1}{2^n}\sum_{x \in \{0,1\}^n} f(x)(-1)^{S \cdot x}$. We have seen that $(-1)^{S \cdot x}$ is $1$ when $x$ has an even number of $1$'s out of those bits indexed by $S$, and $-1$ when it has an odd number. Since $f$ is Boolean, each $f(x)$ is either $1$ or $-1$. Thus the products in the sum are $1$ precisely when either $x$ has an even number of $1$'s and $f(x) = 1$, or when $x$ has an odd number of $1$'s and $f(x) = -1$. Stated more simply, these product terms are $1$ precisely when $f(x)$ agrees with the output of the parity function acting on those bits indexed by $S$, i.e. $f(x) = \bigoplus_{i \in S} x_i$. Similarly these product terms are $-1$ precisely when $f(x)$ disagrees with the parity of $x$ over $S$. If we split the sum then into two sums, the first consisting of all $1$'s and then subtracting from that all $-1$'s, then we have precisely the formula that we were trying to prove. 
+\end{proof}
+The switching lemma has implications for the degree of Boolean functions. 
+\begin{lemma}
+	Suppose $f$ is given by a CNF or DNF formula, where expressed as a Boolean circuit has bottom fanin at most $t$. Apply a random restriction $\rho$ with parameter $p$. Then for any $s$, the probability that the degree of $f\restriction \rho$ exceeds $s$ is at most $(5pt)^s$ (for sufficiently small $p$?)
+\end{lemma}
+\begin{proof}
+	Suppose that, after applying a random restriction with parameter $p$ to $f$, that the switching lemma applies i.e. the CNF can be flipped to a DNF (wlog) of bottom fanin at most $s$, and such that each clause accepts a disjoint set of inputs. Consider an $S$ such that $|S| > s$. We claim that $\hat{f \restriction \rho}(S) = 0$. To see this, note that $|S| > s$ means that for each bottom level AND gate, there is a string index in $S$ which is not one of that clause's inputs. This means that for any string accepted by the AND gate which is of even parity (relative to $S$), there is another accepted by it which is of odd parity (flip the missing bit in $S$). Likewise the other way. It follows that, relative to $S$, each AND gate accepts the same number of strings of even and odd parity. It follows that the overall DNF circuit itself accepts the same number of even and odd parity strings relative to $S$, since each bottom level gate accepts a disjoint set of inputs. But if this is the case then $P\left(f(x) = \bigoplus_{i \in S} x_i \right) = P\left(f(x) \neq \bigoplus_{i \in S} x_i \right)$, and so by the above lemma it follows that $\hat{f\restriction \rho}(S) = 0$. A similar argument gives the same result for DNF circuits.
+\end{proof}
+\begin{lemma}
+	Let $f$ be a Boolean function computed by a circuit of size $M$ and depth $d$, and suppose $\rho$ is a random restriction with parameter $p = \frac{1}{10^ds^{d-1}}$. Then the probability that the degree of $f\restriction \rho$ is greater than $s$ is at most $\frac{M}{2^s}$. Larger choices of $p$ are sufficient for the same bound.
+\end{lemma}
+\begin{proof}
+	First, we hit with a restriction of parameter $p = \frac{1}{10}$. After that we will hit with $d-1$ more restrictions of parameter $\frac{1}{10s}$. Upon hitting with the first restriction, we claim that with probability at least $1-\frac{1}{2^s}$, we can assume that each bottom level gate has fanin at most $s$ (and this is without using the switching lemma). To see this, consider an individual bottom level gate. Assume wlog that the bottom level gates are AND gates. We break the situation up into two cases. \par 
+	For the first case, suppose that this bottom level AND gate has fanin more than $2s$. Since these are AND gates, it will be trivialized to $0$ if any of it's inputs are restricted to $0$. The probability that this happens to a particular input is of course the probability that it is not made a $*$ by $\rho$, times the conditional probability that it is made a $0$ given this, i.e. $\frac{9}{10}\frac{1}{2} = \frac{9}{20}$. So $\frac{11}{20}$ is the probability that an individual input to the AND gate doesn't deletes the gate from consideration post-restriction. Therefore the probability that the gate isn't trivialized is at most $\frac{11}{20}^{2s} < \frac{1}{2^s}$. Since a gate being trivialized is equivalent to it's fanin being $0$, and the probability that the fanin exceeds $0$ is bigger than the probability that the fanin exceeds $s$, and thus the probability that the fanin exceeds $s$ is also at most $\frac{1}{2^s}$. \par 
+	For the second case, suppose that the bottom level AND gate has fanin less than or equal to $2s$. To have fanin exceeding $s$ is of course equivalent to having the $\leq 2s$ many inputs assigned more than $s$ many $*$'s. If $k \leq 2s$ is the fanin of the gate, the number of $*$'s assigned to the gate follows a binomial distribution, and the probability that the number exceeds $s$ is 
+	\begin{align}
+		 \sum_{i=s+1}^{k} {k \choose i} \left( \frac{1}{10}\right)^i \left(\frac{9}{10} \right)^{k-i} &\leq \sum_{i=s+1}^{k} {k \choose i} \left( \frac{1}{10}\right)^i \\
+		 &\leq \sum_{i=s+1}^{2s} {2s \choose i} \left( \frac{1}{10}\right)^s \\
+		 &\leq \sum_{i=0}^{2n} {2s \choose i} \left(\frac{1}{10}\right)^s \\
+		 &= 2^{2s}\left(\frac{1}{10}\right)^s \\
+		 &= \left( \frac{4}{10} \right)^s < \frac{1}{2^s}
+	\end{align}
+	The takeaway from all of this is that, upon hitting our circuit with a random restriction with parameter $\frac{1}{10}$, the probability that any gate has fanin exceeding $s$ is at most $\frac{1}{2^s}$, and so the probability that at least one of these gates fails to have fanin at most $s$ is $\frac{m_1}{2^s}$, where $m_1$ is the number of bottom level gates. \par 
+	Now we apply $d-2$ more restrictions each with parameter $p = \frac{1}{10s}$. Assuming that the previous restriction was successful in ensuring bottom fanin at most $s$, the probability that any bottom level $DNF$ subcircuits can't be flipped into $DNF$ circuits with the same maximal bottom fanin is at most $(5\frac{1}{10s}s)^s = \frac{1}{2^s}$. The probability that at least one of these bottom subcircuits fails to flip is at most $m_2\frac{1}{2^s}$, where $m_2$ is the number of level $2$ gates. \par 
+	Finally, after applying all of these restrictions, assuming no failures we will have a single CNF or DNF circuit of bottom fanin at most $s$. We hit with a final restriction of $p = \frac{1}{10s}$. At this point we refer to the previous lemma, which tells us that there is an at most $\frac{1}{2^s}$ chance of the final restricted function having degree exceeding $s$. The overall probability that the degree of the final circuit exceeds $s$ is at most the sum of the probabilities that each individual stage of this process fails, i.e. it is at most $\sum_{i=1}^d m_i \frac{1}{2^s} = \frac{M}{2^s}$. 
+\end{proof}
+We now begin to relate the degree of the function $f$ to the degree of it's restrictions. Some notation is in order. We will denote $S \subseteq \{1,\ldots,n\}$ to be the set of $*$'s fixed by a random restriction, and so $L = S^c$ is the set of literals. There are many $|L|$ bit strings that could occur here with equal probability, since the literals are either $0$ or $1$. Thus we will use $r \in \{0,1\}^|L|$ to denote the possible literals which could occur in the situation that $S$ is fixed. Finally we will let $f \restriction r$ denote a particular restriction of $f$. 
+\begin{lemma}
+	For any $A \subseteq \{1,\ldots,n\}$, we have
+	\[ \hat{f}(A) = \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}}\chi_{A \cap L}(r)\hat{f} \restriction r(A \cap S) \]
+\end{lemma}
+\begin{proof}
+	The key to making sense of this expression on the right is also the key to proving it, and that is to note the hat on the $f$. Recall that $\hat{f}(A) = \braket{f,\chi_A} = E(f(x)\chi_A(x))$, where $E$ is the expected value. Expanding this rhs accordingly gives
+	\begin{align}
+		& \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}}\chi_{A \cap L}(r)\left[ \frac{1}{2^{|S|}} \sum_{x \in \{0,1\}^{|S|}} f \restriction r(x)\chi_{A \cap S}(x) \right] \\
+		&= \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \frac{1}{2^{|S|}} \sum_{r \in \{0,1\}^{|S|}} \chi_{A \cap L}(r)\chi_{A \cap S}(x)(f \restriction r)(x)
+	\end{align}
+	Consider the product of these two characters inside the double sum. With both $r$ and $x$ fixed, we have fixed a full length string $y \in \{0,1\}^n$. What this product is doing is taking the parity of the bits of $y$ indexed by $L$ (or at least those of $A$), then the parity of the bits indexed by $S$ (again, specifically those in $A$), and multiplying them. If the parity of the first term is even and that of the second is odd, or vice versa, then the overall product is clearly $-1$. But we can also see in this situation that $y$ has an even plus an odd number of bits \emph{overall} in $A$, i.e. $\chi_A(y) = -1$. Similarly if both of these are $1$, then $y$ has an even \emph{overall} parity in $A$, and thus $\chi_A(y) = 1$, again agreeing with the product. We've thus establishes that 
+	\[ \chi_{A \cap L}(r)\chi_{A \cap S}(x) = \chi_A(y) \]
+Similarly, if we consider the term $(f \restriction r)(x)$, we see that we are simply plugging in some of the digits of $y$ and calling it a restriction, then plugging in the rest of it. It is thus clear that $(f \restriction r)(x) = f(y)$. If the $\frac{1}{2^{|S|}}$ is pulled out and merged with the $\frac{1}{2^{|L|}}$, the result is clearly $\frac{1}{2^n}$. Finally, the double sum clearly ranges over all possible $y$, and we can re-express it as simply the sum over all $y \in \{0,1\}^n$. We have established that the above expression is equal to
+\[ \frac{1}{2^n} \sum_{y \in \{0,1\}^{n}}  \chi_A(y)f(y) = \hat{f}(A) \]
+\end{proof}
+\begin{lemma}
+	Let $f:\{0,1\}^n \to \{-1,1\}$ a Boolean function and $S \subseteq \{1,\ldots,n\}$ (set of stars intuitively). For any $B \subseteq S$, 
+	\[ \sum_{C \subseteq L} \hat{f}(B \cup C)^2 = \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \hat{f} \restriction r(B)^2  \]
+\end{lemma}
+\begin{proof}
+By the previous lemma, and noting in advance that we have $(B \cup C) \cap L = C$ and $(B \cup C) \cap S = B$, we have
+\begin{align}
+	\sum_{C \subseteq L} \hat{f}(B \cup C)^2 &= \sum_{C \subseteq L} \left[ \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \chi_{(B \cup C) \cap L}(r) \hat{f}\restriction r((B\cup C) \cap S) \right]^2 \\
+	&= \sum_{C \subseteq L} \left[ \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \chi_C(r) \hat{f}\restriction r(B) \right]^2 \\
+	&= \sum_{C \subseteq L} \left[ \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \chi_C(r) \hat{f}\restriction r(B) \right]\left[ \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \chi_C(r) \hat{f}\restriction r(B) \right] \\
+	&= \frac{1}{2^{2|L|}} \sum_{r_1,r_2 \in \{0,1\}^{|L|}} \hat{f}\restriction r_1(B) \hat{f}\restriction r_2(b) \left[ \sum_{C \subseteq L} \chi_C(r_1)\chi_C(r_2) \right] \\
+	&= \frac{1}{2^{2|L|}} \sum_{r_1,r_2 \in \{0,1\}^{|L|}} \hat{f}\restriction r_1(B) \hat{f}\restriction r_2(b) \left[ \sum_{C \subseteq L} \chi_C(r_1 \oplus r_2) \right] 
+\end{align}
+Where the final substitution of $ \chi_C(r_1)\chi_C(r_2)$ for $\chi_C(r_1 \oplus r_2)$ follows since $\chi_C$ is a homomorphism over $\mathbb{Z}_n^2$. In fact, we claim that this sum is $2^{|L|}$ if $r_1 = r_2$ and $0$ otherwise. To show this, first consider the case that $r_1 = r_2$. Then $r_1 \oplus r_2 = 00\ldots0$, and so $\chi_C(r_1 \oplus r_2) = 1$, and of course there are $2^{|L|}$ many of these $1$'s. The case $r_1 \neq r_2$ is a bit trickier, and requires some counting. Since they aren't equal, there is a set of indices $E$ on which they differ. Of course, the result of $\chi_C$ depends on the $C$, and in fact we can say in advance that $\chi_C(r_1 \oplus r_2) = 1$ if $|C \cap E| = 0mod2$, and $-1$ if $|C \cap E| = 1mod2$. We can be sure of this since on any index where $r_1$ and $r_2$ are the same, the digit is guaranteed to be $0$, and won't contribute to the sum. We can now observe that $\sum_{C \subseteq L} \chi_C(r_1 \oplus r_2)$ is equal to the number of subsets $C$ such that $|C \cap E|$ is even \emph{minus} the number of subsets $C$ such that $|C \cap E|$ is odd. Fix the indices of $C$ which don't intersect with $E$, i.e. fix $C-E$, noting that there are $2^{|L|-|E|}$ ways to do this. For each of these, $C$ could have no elements from $E$, or just $1$, or $2$ or... up to $|E|$. Thus we have
+\[ \sum_{C \subseteq L} \chi_C(r_1 \oplus r_2) = 2^{|L|-|E|}\left[ \sum_{\alpha \textrm{ even}} {|E| \choose \alpha} - \sum_{\alpha \textrm{ odd}} {|E| \choose \alpha} \right] \]
+Here there is a useful little fact from combinatorics: for a fixed $n$, the sum of all even combinations minus the sum of all odd combinations (from a set of $n$ objects) is always $0$. To see this, observe
+\[ 0 = (1-1)^n = \sum_{i=0}^n {n \choose i} (-1)^i = \sum_{i \textrm{ even}} {n \choose i} - \sum_{i \textrm{ odd}} {n \choose i} \]
+Thus the term in brackets is $0$, and we have shown that the sum itself thus must be $0$. Returning with this to our original expression, we can see that the only nonzero terms of the overall sum will appear when $r_1 = r_2$, allowing us to replace the outermost double sum with a single sum over the strings in $\{0,1\}^{|L|}$, and the term in brackets with $2^{|L|}$. This leaves us with
+
+ \[	\frac{1}{2^{2|L|}} \sum_{r_1,r_2 \in \{0,1\}^{|L|}} \hat{f}\restriction r_1(B) \hat{f}\restriction r_2(b) \left[ \sum_{C \subseteq L} \chi_C(r_1 \oplus r_2) \right] = \frac{2^{|L|}}{2^{2|L|}} \sum_{r \in \{0,1\}^{|L|}} \hat{f}\restriction r (B)^2  \]
+Canceling the numerator with half the denominator completes the proof.
+\end{proof}
+\begin{lemma}
+	Suppose we fix a set $S$ of stars, for some restriction. We can then talk about the probability experiment of fixing the literals, where each index of $L$ is equally likely to be a $0$ or a $1$. Also fix an integer $k$. I.e. we are sampling an $r \in \{0,1\}^{|L|}$ uniformally at random. Then
+	\[ \sum_{A \subseteq L, |A \cap S| > k} \hat{f}(A)^2 \leq P(deg(\hat{f} \restriction r) > k) \]
+\end{lemma}
+\begin{proof}
+	First we re-express the lhs as a double sum, and apply our above lemma to the inner of the two: 
+	\begin{align*}
+		\sum_{A \subseteq L, |A \cap S| > k} \hat{f}(A)^2 &= \sum_{B \subseteq S, |B| > k} \sum_{D \subseteq L} \hat{f}(B\cup D)^2 \\
+		&= \sum_{B \subseteq S, |B| > k} \frac{1}{2^{|L|}} \sum_{r \in \{0,1\}^{|L|}} \left( \hat{f} \restriction r(B) \right)^2 \\
+		&= \sum_{r \in \{0,1\}^{|L|}} \frac{1}{2^{|L|}} \sum_{B \subseteq S, |B| > k} \left( \hat{f}\restriction r(B) \right)^2
+	\end{align*}
+	Now observe that if $r$ is such that the degree of $f \restriction r$ is less than or equal to $k$, then $\hat{f} \restriction r (B) = 0$ for any $|B| > k$. Furthermore, since $\hat{f} \restriction r$ is a Boolean function and has norm $1$, it follows that if $r$ is such that the degree of $f \restriction r$ is greater than $k$, then $\sum_{B \subseteq S, |B| > k} \left(\hat{f} \restriction r(B)\right)^2 \leq 1$. Thus  
+	\begin{align}
+		\sum_{r \in \{0,1\}^{|L|}} \frac{1}{2^{|L|}} \sum_{B \subseteq S, |B| > k} \left( \hat{f}\restriction r(B) \right)^2 &\leq \sum_{r \in \{0,1\}^{|L|}, deg(f\restriction r) > k} \frac{1}{2^{|L|}}  \\
+		&= \frac{\textrm{Number of $r \in \{0,1\}^{|L|}$ such that $deg(f \restriction r) < k$}}{\textrm{Total number of such restrictions}} \\
+		&= P(deg(f \restriction r) > k)
+	\end{align} 
+\end{proof}
+One more technical lemma and we can prove the main result. This little fact is simply the result of basic ideas from probability, and will be the starting point to proving our main result. 
+\begin{lemma}[Chernoff Bounds]
+	Let $X = \sum_{i=1}^n X_i$ be a sum of independent Bernoulli random variables each with probability $p_i$. Then for any $a,t > 0$, 
+	\[ P(X > a) \geq 1-\exp\left(-\left(\sum_{i=1}^n p_i \right)(1-e^{-t})+ta\right) \]
+\end{lemma}
+\begin{proof}
+	Recall Markov's Inequality: For any random variable $A$ and any $a>0$, $P(A \geq a) \leq \frac{E(A)}{a}$. Then for any $t > 0$,
+	\begin{align*}
+		P(X > a) &= P(e^{-tX} < e^{-ta}) \\
+		&= e^{-ta}e^{ta}P(e^{-tX} < e^{-ta}) \\
+		&\geq e^{-ta}e^{ta}\left( (1-\frac{E(e^{-tX}}{e^{-ta}}) \right) \label{s1}\tag{1} \\
+		&= 1-e^{ta}E(e^{-t\sum X_i}) \\
+		&= 1-e^{ta}\prod_{i=1}^nE(e^{-tX_i}) \label{s2}\tag{2} \\
+		&= 1-e^{ta}\prod[e^{-t}p_i + (1-p_i)] \label{s3}\tag{3} \\
+		&= 1-e^{ta}\prod[1-p_i(1-e^{-t})] \\
+		&\geq 1-e^{ta}\prod e^{-p_i(1-e^{-t})} \label{s4}\tag{4} \\
+		&= 1-e^{ta}e^{-(\sum p_i)(1-e^{-t})}
+	\end{align*}
+	Here \eqref{s1} follows from applying the complement rule to Markov's inequality, \eqref{s2} comes from the independence of the $X_i$'s, \eqref{s3} comes from simply carrying out the expected value of each Bernoulli, and \eqref{s4} comes from the fact that $1+\alpha \leq e^{\alpha}$ for all $\alpha \in \mathbb{R}$. 
+\end{proof}
+\begin{lemma}
+	Let $f$ be a Boolean function on $n$ variables, $t$ an integer, and $0 < p < 1$, with $pt > 8$. Consider the probability experiment of picking a subset $S \subseteq \{1,\ldots,n\}$ such that each variable appears in $S$ independently with probability $p$. Then 
+	\[ \sum_{A \subseteq \{1,\ldots,n\}} (\hat{f}(A))^2 \leq 2E\left( \sum_{ |A| > t, |A \cap S| > \frac{pt}{2}} \hat{f}(A)^2 \right) \]
+\end{lemma}
+\begin{proof}
+	Fix a particular $A$ of size greater than $t$, and consider the random variable $|A \cap S|$. This can be seen as a sum of independent Bernoulli random variables $X_i$, where each $X_i$ is $1$ iff index $i$ is in both $S$ and $A$. Clearly this probability is $p\frac{|A|}{n} \geq \frac{pt}{n}$. Then applying the Chernoff bound derived above with $a = \frac{pt}{2}$, we have
+\begin{align*}
+	P(|S \cap A|) > \frac{pt}{2}) &\geq 1-\exp\left( \sum_{i=1}^n-(pt)(1-e^{-\alpha})-\frac{\alpha pt}{2}  \right) \\
+		&\geq 1-\exp\left(-pt(1-e^{-\alpha}) + \frac{\alpha pt}{2} \right) \\
+		&= 1-\exp\left( -pt(1-e^{-\alpha}-\frac{\alpha}{2}) \right)
+\end{align*}
+	Where $\alpha > 0$ is a parameter; we can pick anything we want for it, and the second line of this follows from the fact that since $p_i \geq \frac{pt}{n}$ for all $i$, $\sum p_i \geq pt$. The function $1-e^{\alpha} - \frac{\alpha}{2}$ has a global maximum near $\alpha = 0.6$ of $0.15 > 0.125 = \frac{1}{8}$. Thus choosing this for $\alpha$, we obtain the final bound that the probability of the size of $|S \cap A|$ exceeding $\frac{pt}{2}$ is at least $1-e^{-\frac{pt}{8}}$. \par  
+	But by hypothesis $-\frac{pt}{8} < -1$, meaning that $e^{-\frac{pt}{8}} < \frac{1}{e}$, i.e. $1-e^{-\frac{pt}{8}} > 1-\frac{1}{e} > \frac{1}{2}$. For each $A \subseteq \{1,\ldots,n\}$ with $|A| > t$, we can define the Bernoulli random variable $X_A(S)$ which is $1$ if $|A \cap S| > \frac{pt}{2}$ and $0$ otherwise, and observe that the right hand side is two times the sum of these random variables multiplied by the constant $\hat{f}(A)^2$. Further we note that by our Chernoff observations the expectation of each of these is greater than $\frac{1}{2}$. Using linearity of expectation we obtain 
+	\begin{align*}
+		E\left( \sum_{A \subseteq \{1,\ldots,n\}, |A \cap S| > \frac{pt}{2}} \hat{f}(A)^2 \right) &= E \left( \sum_{A \subseteq \{1,\ldots,n\}} \hat{f}(A)^2 X_A \right) \\
+		&= \sum_{A \subseteq \{1,\ldots,n\}} \hat{f}(A)^2 E(X_A) \\
+		&\geq \frac{1}{2}\sum_{A \subseteq \{1,\ldots,n\}} \hat{f}(A)^2
+	\end{align*}   
+\end{proof}
+\begin{theorem}
+	Let $f$ be a Boolean function computed by a circuit of depth $d$, size $M$, and let $t$ be an integer such that $\frac{1}{10}t^{\frac{1}{d}} > 8$. Then 
+	\begin{align}
+		\sum_{A \subseteq \{1,\ldots,n\}, |A| > t} \hat{f}(A)^2 \leq (2M)2^{-\frac{1}{20}t^{\frac{1}{d}}}
+	\end{align}
+\end{theorem}
+\begin{proof}
+	Fix $p = \frac{1}{10t^{\frac{d-1}{d}}}$, and $s = \frac{pt}{2} = \frac{1}{20t^{\frac{1}{d}}}$ (note this implies $t = \frac{sp}{2}$). Consider the two stage probability experiment of first sampling a set $S \subseteq \{1,\ldots,n\}$ where each index appears in $S$ with probability $p$, and then sampling a string $r$ from $L = S^c$ where each bit is $0$ or $1$ independently and with equal probability. Note this is equivalent to choosing a random restriction $\rho$ with parameter $p$. By lemma $4.7$ we have
+	\begin{align*} \sum_{A \subseteq \{1,\ldots,n\}, |A| > t} \hat{f}(A)^2 &\leq 2E(\sum_{A \subseteq \{1,\ldots,n\},|A \cap S| > \frac{pt}{2}} \hat{f}(A)^2 \\
+	&\leq 2E\left(P(deg(f\restriction r) > \frac{pt}{2} (= s)\right)
+	\end{align*}
+We are now clearly close to a position to apply lemma $4.3$. To ensure that we are allowed to use it, observe that by choice of $p$ and $s$,
+\begin{align*} 
+	p &= p^{\frac{d}{d}} = \frac{1}{10(\frac{sp}{2})^{\frac{d-1}{d}}} = \frac{1}{10}\left( \frac{2}{sp} \right)^{\frac{d-1}{d}}  \\
+	&\implies p^{\frac{2d-1}{d}} = \frac{1}{10}\left( \frac{2}{s} \right)^{\frac{d}{d-1}} \\
+	&\implies p = \frac{1}{10^{\frac{d}{2d-1}}} \left( \frac{2}{s} \right)^{\frac{d-1}{2d-1}} \geq \frac{2^{d-1}}{10^ds^{d-1}} > \frac{1}{10^ds^{d-1}} 
+\end{align*}
+Where the second to last inequality follows from the fact that $s > \frac{pt}{2} > 4$, so that $\frac{2^{d-1}}{10^ds^{d-1}} = \frac{1}{10}\left(\frac{1}{20} \right)^{d-1} < 1$, ensuring that taking a $2d-1^{th}$ root produces a bigger number than not taking it. By lemma $4.3$ then we have that $P(deg(f\restriction r) > s) \leq \frac{M}{2^s}$, a constant with respect to $S$. The expectation of the degree of $f$ under the restriction is thus bounded below this constant, and we are left with
+\[ \sum_{A \subseteq \{1,\ldots,n\}, |A| > t} \hat{f}(A)^2 \leq \frac{2M}{2^s} \]
+Noting again that $s = \frac{1}{20}t^{\frac{1}{d}}$ completes the proof. 
+\end{proof}
+
+\section{Descriptive Complexity of Oracle Class Separating PH and PSPACE}
+First, we need to demonstrate an oracle relative to which PH is equal to PSPACE. 
+\begin{lemma}
+	Let $E$ be an $\bm{EXP}$-complete problem. Then $\bm{PH}^E = \bm{PSPACE}^E$. 
+\end{lemma}
+\begin{proof}
+	First, note that clearly $\bm{EXP} \subseteq \bm{PH}^E$, since $\bm{EXP} \subseteq \bm{P}^E$. Next we show that $\bm{PSPACE}^E \subseteq \bm{EXP}$, so that we will have
+	\[ \bm{EXP} \subseteq \bm{PH}^E \subseteq \bm{PSPACE}^E \subseteq \bm{EXP} \]
+which obviously completely the proof. To see this, consider a machine $M^E$ operating in polynomial space, say time $n^{k_1}$. Overlooking the oracle queries for a moment, we know that we can simulate space $n^{k_1}$ machines in time $O(C^{n^{k_1}})$ for some constant $C > 1$. Consider the machine which simulates $M^E$ in this manner, and then, when $M^E$ would normally query $E$, simply deterministically solves $E$ in whatever time is required, say time $O(2^{n^{k_2}})$. Clearly this machine decides the same language as $M^E$, and furthermore it operates in worst case time $O(2^{cn^{k_1}+n^{k_2}} = O(2^{n^k})$ for some $k \in \omega$. Thus $L(M^E) \in \bm{EXP}$, demonstrating the claim.
+\end{proof}
+As before, let us define the class $\bm{S}$ to be the set of oracles $A$ relative to which $\bm{PH}^A \neq \bm{PSPACE}^A$. 
+\begin{lemma}
+	$\bm{S} \in \Pi^0_2$
+\end{lemma}
+\begin{proof}
+	For an oracle $A$, we define what we will call a $\bm{PSPACE}^A$-expression. These are of the form 
+	\[ \phi(x) = \exists^p_{x_1} \forall^p_{x_2} \ldots Q^p_{x_{n^k}} R^A(y,x) \]
+	where $y$ is the concatenation of all strings of length $x_i$, and $R^A$ is a relation relative to $A$ corresponding to a Turing machine (we put no time or space bounds on it for now) computation. We will assume for simplicity that the same polynomial bound $k$ is used for the strings being quantified over and the \emph{number of alternations of quantifiers}. Enumerate over all such expressions (this can easily be done computably and in polynomial time). We define a particular language $U$ for which membership of it in $\bm{PH}^A$ is equivalent to $\bm{PSPACE}^A = \bm{PH}^A$. From this it will follow that $\bm{S}^C$ is $\Sigma^0_2$, since expressing that a language is in the class $\bm{PH}^A$ will show itself to be easily expressible as a $\Sigma^0_2$ expression. \par 
+	The language $U$ is defined as follows. The language will be over the alphabet $\{0,1,p\}$ for some symbol $p$. For a pair of binary strings $n,xp^l$ for some $l \in \omega$, $(n,xp^l) \in U$ iff $\phi_n(x)$, i.e. the $n^{th}$ $\bm{PSPACE}^A$ expression "accepts" $x$, and the machine relation $R(y,x)$ associated with this expression halts on the appropriate $y$'s appended with $x$ in time $|xp^l|$. Thus the $p$'s act as padding for the checking of runtimes longer than simply the length of $x$. We claim that this language is in $\bm{PSPACE}^A$. To show this note that that $R^A(y,x)$ is computable in polynomial time relative to $A$, since $y,x$ is always a polynomial length input in $|x|$ and $R^A$ can be simulated by a universal Turing machine with polynomial efficiency loss. Since polynomial time computations only use at worst polynomial space, we can easily maintain polynomial size stacks in order to check through every possible combination of $x_i$ using polynomial space. \par 
+	Suppose that $U \in \bm{PH}^A$. For simplicity we use the identity $\bm{AP}^A = \bm{PSPACE}^A$ and show that an arbitrary polynomial time alternating Turing machine decided a language that can also be decided in $\bm{PH}$. Let $M^A$ be an alternating Turing machine which halts in polynomial time. The configuration graph of an alternating Turing machine can be seen as a polynomial depth circuit of alternating AND and OR gates, where the type for each non-leaf gate is determined by the type of the corresponding configuration. Likewise all configurations reachable in a polynomial number of steps can be represented as polynomial length strings. At the bottom of the graph we have acceptance or rejection leaves, which can be taken as literals. For a concatenation of polynomially many configuration strings $y$, let $R^A(y,x)$ be the relation which is true iff the path in the configuration graph outlined by $y$ leads to a terminal accepting state. Clearly with the help of $A$ this can be decided in time polynomial in $|x|$. It follows that we can construct a $\bm{PSPACE}^A$ expression $\phi$ such that $x \in L(M^A)$ iff $\phi(x)$. Since $U \in \bm{PH}^A$, there is for some $i \in \omega$, and some poly-time computable relation $S^A(y,x)$, an expression $\psi(n,x) = \exists^p_{x_1} \forall^p_{x_2} \ldots Q^p_{x_i} S^A(y,n,x)$ ($y$ the concatenation of the quantified strings) such that $(n,x) \in U \iff \psi(n,x)$. Let $m$ be the integer indexing the $\bm{PSPACE}^A$ expression $\phi$. It is clear that $(m,x) \in U$ iff $\phi(x)$. Thus $\psi(m,x)$ is a $\bm{PH}^A$ expression for $L(M^A)$. Thus $\bm{PSPACE}^A \subseteq \bm{PH}^A$, as desired. \par 
+	
+\end{proof}
+

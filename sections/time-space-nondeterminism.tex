@@ -1,0 +1,392 @@
+\section{Time, Space, and Nondeterminism: The Power of Guess and Check}
+\begin{definition}
+A \textbf{nondeterministic Turing machine} is defined nearly identically to a normal (deterministic) Turing machine. It is, just as before, a triplet $M=(\Sigma, Q, \delta)$, where everything is as it was before, \textit{except} that the transition function $\delta$ is no longer required to be a function. It is defined to be instead simply a relation.
+\end{definition}
+Thus the nondeterminism comes from there being (possibly) several possible configurations which the Turing machine to transition into. \textit{A single state/symbol pair could lead to multiple actions of the machine.}
+\par In order to define what it means for a nondeterministic machine to accept or reject an input, we must first define an extremely important and valuable tool for thinking about computation. The following definition will be modified slightly after making some observations.
+\begin{definition}
+Let M be a (possibly nondeterministic) Turing machine. The \textbf{configuration graph} of M is the graph whose vertices index possible configurations of the machine. For two configurations $c_1$ and $c_2$, there is an edge between the corresponding vertices of the graph iff $c_1$ yields $c_2$ in one step. We also assume that if $c$ is any halting configuration, there will never be any edges leading away from $c$; the graph effectively terminates at these vertices.
+\end{definition}
+We're not really done with the definition above, but before continuing we should define what it means for these machines to compute problems. Note that configuration graphs, even for deterministic machines, may have loops in their configuration graphs (although for a deterministic machine any loop would be terminal). Despite this, if $P = (c_1,c_2,...,c_n)$ is a \textbf{path} in the graph (that is, there is an edge from $c_1$ to $c_2$, an edge from $c_2$ to $c_3$, etcetera), and these configurations are all unique, then we say that P has \textbf{length} n. (We can leave path length undefined otherwise.) We refer to paths where the leading vertex is an initial configuration $c_x$ as \textbf{computational paths} (or just paths, since these are all that we typically care about).
+\begin{definition}
+We say that a nondeterministic Turing machine N \textbf{accepts} the input x if there exists a path in the configuration graph of M from $c_x$ to $c$, where $c$ is an accepting configuration. \textit{We explicitly leave rejection undefined.} We say that M \textbf{decides} a language L if for all strings x,
+\[x \in L \iff N \textrm{ accepts } x\]
+We say that \textbf{N operates in time $f(n)$} if, for \textit{any} input string $x \in \Sigma^\#-\{\sqcup\}$ (not just the ones which are accepted!) the maximum length of any computational path in the configuration graph of N is $f(|x|)$. We say that \textbf{N operates in space $f(n)$} if, for any input string $x \in \Sigma^\#-\{\sqcup\}$, the amount of space used by any of N's work strings never exceeds $f(n)$, for any computational path.
+\end{definition}
+Nondeterministic Turing machines aren't really a new model of computation, separate from the Turing machine model. The primary reason for this is that we don't have a definition of what it means for a nondeterministic machine to compute a function. Since we've only defined deciding relations, they are relegated to computing characteristic functions only. In this sense, we will see that they are every bit as powerful of a model as deterministic Turing machines, but enumerating them won't implicitly define an admissible numbering of \textit{all} partial recursive functions. There is not yet a universally accepted definition of what it means for a nondeterministic machine to compute a function. Several have been proposed, and a paper by Royer and Marchi (2016 I dunno how to cite things dont @ me) seems to do a good job surveying all of them, but at present I'm not going to try to. (I might change my mind later.) The takeaway is that \textit{nondeterministic time and space are different computational resources from their deterministic counterparts}, but until we have agreed on a definition for what it means to compute a function nondeterministically, we cannot generate an admissible numbering of Turing machines and cannot view them as resources via Blum's axioms.
+\par Before we define the basic nondeterministic classes, we need to finish the definition of a configuration graph. Doing so requires some observations.
+\par Suppose that a $k$-string Turing machine with input $M = \{\Sigma,Q,\delta)$ (nondeterministic or otherwise) operates in time $f(x)$. Note that for any configuration $c$, there are at most $r=3k|\Sigma|^k|\delta|$ configurations that can be yielded by $c$ in one step. Thus, for any initial configuration $c_x$, there are at most $f(|x|)^r$ configurations which can be yielded by $c_x$ in $f(x)$ steps. The important thing to note is that this is finite. 
+\par Next suppose that $f(x)$ is instead a space bound. We already noted in the last section that the total number of configurations which are reachable from an initial configuration $c_x$ is $O(2^{cf(|x|)})$ for some constant $c$ depending globally on $f$ (i.e. not on the specific input) as well as details of the Turing machine. Again, this number is finite. We summarize, and adopt a convention: \\ \\
+If a Turing machine is operating under any kind of resource budget, then the total number of configurations which are reachable from any initial configuration is bounded and we take the configuration graph $|G_x|$ to be this \textit{finite} subgraph.\\
+\begin{definition}
+For a function $f:\mathbb{N} \to \mathbb{R}$, let $\textbf{NTIME($f(n)$)}$ denote the class of all languages which are decidable by a nondeterministic Turing machine in time $g(n)$ for some $g(n) \in O(f(n))$.  $\textbf{NSPACE($f(n)$)}$ is defined in the same way.
+\begin{align}
+    \textbf{NL} = \textbf{NSPACE($log(n)$)}
+\end{align}
+\begin{align}
+    \textbf{NP} = \bigcup_{k=1}^\infty \textbf{NTIME($n^k$)}
+\end{align}
+\end{definition}
+There are hundreds of colorful and fascinating complexity classes, but certainly \textbf{L, NL, P, NP,} \textbf{PSPACE}, and to a lesser extent \textbf{EXP}, are the stars of the show. 
+\begin{fact}
+For any function $f:\mathbb{N} \to \mathbb{R}$,
+\begin{align}
+    \textbf{TIME($f(n)$)} \subseteq \textbf{NTIME($f(n)$)} 
+\end{align}
+\begin{align}
+    \textbf{SPACE($f(n)$)} \subseteq \textbf{NSPACE($f(n)$)} 
+\end{align}
+\end{fact}
+\begin{proof}
+Any deterministic Turing machine is also nondeterministic machine. We just need to make sure that our definitions of decidability line up properly. Suppose the deterministic machine M decides a language L in time or space $f(n)$. Then the configuration graph for any input $|G_x|$ is then just a single path, which clearly ends in an accepting configuration if and only if $x \in L$. Thus, M decides L in the nondeterministic sense as well. The resource bounds are also clearly still satisfied.
+\end{proof}
+As an immediate corollary we get that \textbf{L} $\subseteq$ \textbf{NL} and \textbf{P} $\subseteq$ \textbf{NP}. If we had bothered to define \textbf{NPSPACE}, it would obviously also have been the case that \textbf{PSPACE} $\subseteq$ \textbf{NPSPACE}. As we will see, however, the only nondeterministic space class which deserves it's own name is \textbf{NL}. 
+\begin{fact}
+For any function $f:\mathbb{N} \to \mathbb{R}$
+\begin{align}
+\textbf{NTIME$(f(n))$} \subseteq \textbf{SPACE$(f(n))$}
+\end{align}
+\end{fact}
+\begin{proof}
+Let L be a language decidable by some nondeterministic Turing machine $N=(\Sigma,Q,\delta)$ in time $f(n)$. Let $d=3|\Sigma||Q|$ be the maximum number of nondeterministic choices N can make over all symbol-state pairs. For an input x, our deterministic machine lexicographically runs through all possible $f(n)-tuples$ of these choices (i.e. vectors with $f(n)$ entries, each containing an integer between 1 and d). For each of these vectors, the machine consults the transition function of N, written out on some ancillary tape (this space use does not depend on the input, it is needs a constant amount of space) in order to simulate a computational path of N, on a separate tape. If it ever encounters an invalid path (e.g. a transition function which doesn't only has 3 choices, where $d=5$, and we are trying to simulate choice 4), it merely stops and moves onto the next tuple. If it ever finds an accepting path, then the machine halts and accepts. If it never finds one, it rejects. The tuples themselves are of $df(n) \in O(f(n))$ length, and the simulation of any computational path will use at most $O(f(n))$ space, by Fact 2.2. Thus our deterministic machine operates in space $f(n)$ and decides L.
+\end{proof}
+\par This fact immediately implies that \textbf{NP} $\subseteq$ \textbf{PSPACE}. 
+In order to learn more about the relationship between space and time, and learn most of what there is to know about space in general, we must take a thorough look at one particularly important decision problem:
+\begin{problem} The graph reachability problem:
+\begin{center}
+REACH: Given a graph $G=(V,E)$, where $V=\{1,2,...,n\}$, is there a a path from $1$ to $n$?
+\end{center}
+\end{problem}
+We next present 3 different algorithms for REACH, each one optimizing the problem with respect to a specific resource. 
+\begin{theorem}
+    $\textrm{REACH} \in \textbf{TIME($n^2$)}$
+\end{theorem}
+\begin{proof}
+The idea is to explore outward from the initial vertex in a way that is comprehensive, yet conservative. We want to visit each vertex exactly once, and we want to stop exploring as soon as we've seen everything. We do this bread crumb style: We will 'mark' each vertex that we visit, putting them into a set $M$. Once we are finished exploring, we check the set of marked nodes and see if vertex $n \in M$. To this end, initialize a set $M = \{1\}$ (Of course any vertex has a path to itself!). We also declare a 'work' set $W$, also initially just the set $\{1\}$. 
+\begin{algorithmic}
+\WHILE{$W \neq \varnothing$}
+    \STATE Remove smallest indexed vertex $i$ from $W$.
+    \FOR{$1 \leq j \leq n$}
+        \IF{$(i,j) \in E$ and $j \notin M$}
+            \STATE Add $j \in M$, and Add $j \in W$
+        \ENDIF    
+    \ENDFOR
+\ENDWHILE
+\IF{$n \in M$}
+    \STATE Halt in acceptance
+\ELSE
+    \STATE Halt in rejection
+\ENDIF
+\end{algorithmic}
+\par For any node in $i \in W$, there are at most $n$ nodes with edges away from $i$. Clearly, no nodes will be added into $W$ more than once, so $W$ will eventually be empty, with at most $n$ nodes added in. Thus our algorithm clearly always halts in time $O(n^2)$ It remains to confirm that this algorithm works, i.e. we need to show that
+\begin{align*}
+    \textrm{There exists a path in G from 1 to n} & \iff \textrm{Algorithm accepts the graph G} \\
+                                                & \iff \textrm{At the end of both loops, $n \in M$}
+\end{align*}
+\par To show this, we will do a simple induction on the path length, $k$ and we will actually prove something stronger: At the end of both loops, \textit{every} vertex which is reachable by $1$ appears in $M$. For $k=0$, the only vertex reachable from 1 by a path of length 0 is 1 itself, which is initialized to be in $M$ from the beginning. Assume that for some $k$, if node $m$ is reachable from $1$ by a path of length of length less than or equal to $k$, it will eventually be added to $M$. Suppose $m$ is reachable by a path of length $k+1$. Then there exists a vertex $j$ which is reachable from $1$ by a path of length $k$, and such that $(j,m) \in E$. Since $j$ is at some point deposited into $M$, it will also be deposited into $W$, and so eventually our algorithm will remove $j$ from $W$ and run through all of the nodes, searching for edges from $j$. At that point, it will find the edge $(j,m)$, and add $m$ to $M$ if it wasn't there already. Thus, we can be sure that $m \in M$. By induction then, our algorithm is comprehensive.
+\par Notice that rather than describing a Turing machine explicitly, we have described an algorithm. It should be clear to the reader that, with a little tedium, one could easily construct a Turing machine which performs these steps in $O(n^2)$ time. (You could even invoke the Church Turing thesis if you want to!)
+\end{proof}
+Notice that the algorithm we just described works in space $O(n)$ - The two sets $W$ and $M$ - the breadcrumbs we left behind as we explored, were what allowed us to make sure we never wasted time with vertices we had already seen, and at worst these would contain $n$ vertices each. The next theorem shows us that with an exponential loss of time efficiency, we can achieve an exponential leap in space efficiency:
+\begin{theorem}
+    $\textrm{REACH} \in \textbf{SPACE($\log^2(n)$)}$
+\end{theorem}
+\begin{proof}
+We will actually make sure to consider the Turing machine as we go through this algorithm, because we need to be extremely careful with our space usage to make sure the contents of the work tapes, for which we will have two, remain small. Assume our graph G has n vertices, and assume these are integers coded in binary. Thus, each vertex is a bit string of length $log(n)$. For two vertices x and y, and for natural numbers i, denote the predicate:
+\begin{align}
+    PATH(x,y,i) \iff \textrm{There exists a path from x to y of length at most $2^i$.}
+\end{align}
+Note that 
+\begin{align}
+    G \in \textrm{REACH} \iff PATH(1,n,\log(n))
+\end{align}
+[Should be the ceiling of log but LaTeX problems]
+Our algorithm uses recursion in the sense that undergrad CS majors understand the word. We use the fact that 
+\begin{align}
+    PATH(x,y,i) \iff \exists z (PATH(x,z,i-1)\wedge PATH(z,y,i-1))
+\end{align}
+Using this fact, we describe an algorithm which computes the truth value of $PATH(x,y,i)$ by maintaining a 'stack' and recursively breaking the question down into smaller and smaller pieces, until reaching a case where $i=0$. $PATH(x,y,0)$ can always be computed with no space use, because it is true iff $x=y$ or $(x,y) \in E$, which can be checked by simply consulting the input string. Note that for a graph with n vertices, there will be at worst $2^n$ many of these base cases to check, so this algorithm is not at all cheap from a time perspective. As we mentioned, we'll have two work strings, the first acting as a 'stack', and the second will contain cells of length $\log(n)$, which we will start as strings of 0's and increment in order to count up in what will essentially be for loops. 
+\par So let's describe what exactly our Turing machine does. In at the start of the algorithm, we print the triple $1;n;3\log(n)$ on the first $3\log(n)$ cells of the work string. We'll call strings of this length in the stack tape \textit{cells}. After that, our machine goes into a loop, continually moving the work-string cursor over to the the right-most cell, and reacting to what it sees.
+\par If it sees that $i=0$, we've reached a base case. The machine checks on the input string to see if $PATH(x,y,i)$ is true. If it is true, then the machine replaces the triple $x;y;i$ with a string of the same length, which is just a 1 followed by $3\log(n)-1$ blanks. We'll call this the \textit{accept string}, and denote it $a$. Similarly, we'll denote a \textit{deny string} $d$, which is the same thing but with the starting bit being a 0, and print it in place of $x;y;i$ if $PATH(x,y,i)$ turns out false. Note that since these strings contain blanks, they are unmistakable from the normal triples. It then moves the cursor to the leftwise adjacent cell, and continues the loop.
+\par Otherwise, $i \neq 0$. In this case, it first looks ahead at the two cells to the right. If both of these are the accept string $a$, then it erases the contents of both of those strings, erases the counter in the counting string, moves the counting cursor left to the next counter, and replaces $x;y;i$ with the accept string $a$. If at least one of the cells to the right are the deny string $d$, \textit{and} the counter associated with $x;y$ is maxed out (i.e. filled with 1's), then we know that $PATH(x,y,i)$ is false, and have the machine erase these two cells as well as the counter, moves the counting cursor to the next cell left, and replacing $x;y;i$ with $d$. In either of these two cases, it then moves to the next cell left and continues the loop.
+\par If neither of those two checks are passed, we first make sure that the two cells ahead of us are empty. If they were empty without the machine having to erase them, then that alerts the machine to begin a new counter, which is does by moving the counting cursor right to the next available blank, and filling it with $\log(n)$ zeroes. Otherwise, it increments the counter, and then fills the next two cells to the right with the strings $x;z;i-1$ and $z;y;i-1$, where $z$ is the current contents of the counter. It then moves the cursor to the second of these two cells, and continues the loop.
+\par Some thought will show that this loop will always eventually halt, with the cursor all the way to the left of the stack strings, nothing at all left on the counting tape, and nothing left on the stack tape other than an accept string or a deny string. The machine accepts if it sees $a$, and rejects if it sees $d$.
+Note that by the time we reach a base case $PATH(x,y,0)$, there will be $O(\log(n))$ many triples printed on the stack tape, each of which is itself of length $O(\log(n))$. The counting tape will similarly have $O(\log(n))$ counters, each of length $O(\log(n))$. Thus the total space use of our algorithm is $O(\log^2(n))$, as desired. 
+\end{proof}
+Note that this algorithm seems horrifyingly optimized to use as little space as possible, yet still stops just quadratically shy of proving that this problem is in \textbf{L}. Considering how meticulous this algorithm is, it would seem to instead function as strong evidence that the problem \textit{can't} be in \textbf{L}. As the next, significantly simpler result tells us however, this problem very naturally belongs to \textbf{NL}:
+\begin{theorem} 
+$\textrm{REACH} \in \textbf{NSPACE($\log(n)$)}$
+\end{theorem}
+\begin{proof}
+When we describe nondeterministic algorithms, we will often talk about making 'guesses'. These guesses are fundamentally where nondeterminism can achieve a boost in efficiency over regular machines. (Assuming that they truly are more powerful!) The idea is that there are some problems for which we can 'guess and check' to find a solution. If the check is quick and simple, then we can design a nondeterministic machine for which each guess corresponds to a unique computational path, and any of the guesses which are correct eventually terminate in acceptance. Here, each guess will correspond to a path in the graph. We will spell out how to construct these guesses here, but from then on we will leave the details to the wind. 
+\par Our machine has 0 and 1 as it's only two nontrivial symbols, as well as a special 'guess' state, $q_g$ and a 'check' state $q_c$. We start out in this state. Declare the following options for $\delta$.
+\[\delta(\sqcup, q_g) \to (0,q_g,1) \textrm{ or } (1,q_g,1) \textrm{ or } (0,q_c,-1) \textrm{ or } (1,q_c,-1) \]
+The interpretation here is that our machine can 'guess' random strings of 0's and 1's. At any point it could decide that it's finished guessing, signalled by the state switch from 'guess' to 'check'. There are some tedious details here, in particular the fact that it could guess strings longer or shorter than $\log(n)$, but this can easily be avoided in a variety of ways. The point is that we can guess random strings, which correspond to vertices, and then check if there is an edge between this guess and our previous guess. If there isn't, we halt in rejection. If there is, we make another guess, erasing the guess before last, to be filled up with the next guess. If the vertex that we guess ever ends up being $n$, and the edge check results in a positive answer, then we halt and accept. In this way, we have a machine which randomly guesses directions to go on the graph, and accepts if it serendipitously finds its way to the end of the desired place.
+\end{proof}
+These three facts yield a wellspring of powerful results very quickly.
+\begin{theorem}
+For any function $f:\mathbb{N} \to \mathbb{R}$, where $\log(n) \in O(f(n))$, then
+    \[ \textbf{NSPACE($f(n)$)} \subseteq \bigcup_{C=2}^{\infty}\textbf{TIME$(C^{f(n)})$} \]
+\end{theorem}
+\begin{proof}
+Let L be decidable by a nondeterministic Turing machine N operating in space $df(n)$ for some constant $d$. As we noted above in equation (1), the configuration graph $G_x$ is of size $O(2^{cdf(n)})$ for some $c$, only depending on $f$ (since our standard model uses a fixed number of strings and a fixed two symbol alphabet). Our deterministic Turing machine which decides L is simply the Turing machine we already described for computing REACH, run on the graph $G_x$. Since there are multiple accepting configurations, but as we can see from looking at the REACH algorithm we describe, the last step involves searching through all reachable nodes anyway, so we just stop when and if we find one that works. The only thing left worth considering is how to obtain the graph $G_x$ prior to running the algorithm, but we don't actually need to generate the graph explicitly. We can certainly lexicographically run through all possible configurations of a certain length without having the graph explicitly (this will take at most linear time), and then to check if there is an edge between two configurations, we simply look at all of the options for the transition function, see what each of these options transforms our configuration into, and see if any of them lead to the other configuration. The transition function of any Turing machine is finite, and can be prewritten on an extra string of tape, and doesn't depend on the input, meaning that searching through transitions takes a constant amount of time. Thus this deterministic machine decides $L$ in time $O((2^{cdf(n)})^2) = O((2^{2cd})^{f(n)})$, i.e. $L \in \textbf{TIME}(C^{f(n)})$, where specifically $C = 4^{cd}$.
+\end{proof}
+The tl;dr of the above is that any space bounded machine can be simulated by a time bounded machine which runs exponentially slower than the original bound, by running what is essentially our time efficient reachability algorithm on the configuration graph of the original machine. The technical looking theorem 2.5 has the nifty result of producing a very clean 'wedging' all of the space classes in between the time classes, and vice versa:
+\begin{corollary}
+    \[ \textbf{L} \subseteq \textbf{NL} \subseteq \textbf{P} \subseteq \textbf{NP} \subseteq \textbf{PSPACE} \subseteq \textbf{EXP} \]
+    Furthermore, at least one of these inclusions must be proper. But we have no idea which ones. But we think it's all of them.
+\end{corollary}
+\begin{proof}
+We've already shown the first, third, and fourth inclusions. To show that \textbf{NL} $\subseteq$ \textbf{P}, note that
+\begin{align}
+	\textbf{NL} = \textbf{NSPACE}(\log(n)) &\subseteq \bigcup_{C=2}^{\infty}\textbf{TIME}(C^{\log(n)}) \\
+	&= \bigcup_{k=2}^{\infty}\textbf{TIME}(2^{k\log(n)}) \\
+	&= \bigcup_{k=2}^{\infty}\textbf{TIME}(n^k) = \textbf{P}
+\end{align}  
+The proof that \textbf{PSPACE} $\subseteq$ \textbf{EXP} is identical.  
+\end{proof}
+You are probably wondering at this point why we don't care about \textbf{NPSPACE}. What gives? Here's what gives:
+\begin{theorem}[Savitch's Theorem] For any function $f:\mathbb{N} \to \mathbb{R}$ such that $\log(n) \in O(f(n))$ (i.e. any function which grows asymptotically faster than $\log(n)$, we have
+\begin{align}
+    \textbf{NSPACE$(f(n))$} \subseteq \textbf{SPACE$(f^2(n))$}
+\end{align}
+\end{theorem}
+This gives us the immediately corollary:
+\begin{corollary}
+\textbf{PSPACE} = \textbf{NPSPACE} 
+\end{corollary}
+\begin{proof}
+Let L be decitable be a nondeterministic Turing machine in space $cf(n)$ for some $c$. As is consistent with our current pattern, we deterministically simulate our nondeterministic machine on input x with length n by running the appropriate algorithm for REACH on the configuration graph $|G_x|$, which will be of size $O(2^{cdf(n)})$. In this case the best deterministic space algorithm that we have gives us a total space usage of $O(\log(2^{cdf(n)})^2)=O((cd)^2f^2(n)) = O(f^2(n))$. Assuming that $\log(n) \leq f(n)$, this is clearly just space $O(f^2(n))$. 
+\end{proof}
+What we've just proven is a very deep and precise result: \textit{With respect to the space resource, nondeterminism can only provide at best a quadratic boost to the efficiency of any Turing machine.} A quadratic boost to efficiency only has meaning at the lowest level, which is why $\textbf{NL}$ is still worthy of consideration. In fact, in many ways the $\textbf{L} \overset{?}{=} \textbf{NL}$ question is more naturally the space analog of the $\textbf{P} \overset{?}{=} \textbf{NP}$ question than $\textbf{PSPACE} = \textbf{NPSPACE}$. The first evidence of this comes from a reflection on efficiency from the standpoint of configuration graphs. If polynomials are our standard bearers of efficiency, then claiming that a Turing machine runs in polynomial time means that no path of the configuration graph will ever be longer than polynomial length. That is:
+\[\textrm{N runs in polynomial time} \iff \textrm{Paths in the configuration graph of N are of reasonable length.} \]
+Where time restraints place a restriction on path lengths, space restraints place restrictions on number of vertices. That is to say, \textit{the size of the graph}. However, this size bound is an exponential in the original constraint. If I were to claim that my algorithm ran in polynomial space, e.g. running in space $n^k$ for some k, then the size of the configuration graph is bounded by $n2^{n^k}$ - exponentially large, and certainly not reasonable! To make a claim about that the size of my graph is a polynomial, i.e. reasonable, I have to step down to logarithmic space:
+\[\textrm{N runs in logarithmic space} \iff \textrm{The configuration graph of N is of reasonable size} \]
+In this way, \textbf{L} is actually more analogous to \textbf{P} than \textbf{PSPACE} is, and thus, unfortunately, the most important question of nondeterminism regarding the space resource remains unanswered.
+\par It is also extremely conspicuous that the efficiency divide between our \textbf{SPACE} and \textbf{NSPACE} algorithms for REACH is a quadratic. Consider the following:
+\begin{corollary}
+	Either \textbf{L} is proper in \textbf{NL}, or $\textbf{NSPACE}(\log(n))$ is proper in $\textbf{SPACE}(\log^2(n))$ (or both).
+\end{corollary}
+\begin{proof}
+	By the space hierarchy theorem, \textbf{SPACE}$(\log(n))$ is proper in \textbf{SPACE}$(\log^2(n))$. Since $\textbf{SPACE}(\log(n)) \subseteq \textbf{NSPACE}(\log(n)) \subseteq \textbf{SPACE}(\log^2(n))$, it follows that at least one of these inclusions must be proper.
+\end{proof}
+[Explore this] Knowing what we now know, we see that this nondeterministic algorithm is optimal, in the sense that it is as much more efficient over the deterministic algorithm as we could hope for it to be.
+\par We next turn towards hierarchy theorems for nondeterminism. We know enough about nondeterministic space that proving a space hierarchy theorem isn't really necessary. We now turn to considering a time theorem. As before, we want to start by considering a nondeterministic time bounded variant of the halting problem:
+\[ H^n_f = \{N;x: \textrm{$N$ accepts $x$ within time $f(|x|)$} \} \]
+We aren't going to consider where this language belongs directly. We only wrote it down to identify a problem. Recall in the other hierarchy theorems that we instead of considering $H_f$, considered a single variable diagonal version of it:
+\[ D = \{x: \textrm{$x$ does not accept the input $x$ within time $f(|x|)$}\} \]
+For nondeterminism however, rejection is very different than acceptance. Aside from the time bound, not accepting means that \textit{all paths are rejecting}.
+\begin{theorem}[Nondeterministic Time Hierarchy Theorem]
+	If $f,g$ are proper complexity functions with $f(n+1) \in o(g(n))$, then $\textbf{TIME}(f(n))$ is proper in $\textbf{TIME}(g(n))$
+\end{theorem}
+\begin{proof}
+	Define the function $h$ by $h(1)=2$, and $h(i+1) = 2^{g(i)}$ for $i > 1$. The idea is that the intervals $(h(i),h(i+1)]$ are getting exponentially longer with each $i$. We have been thinking of our diagonal object $D$ as a Turing machine in previous hierarchy theorems. It is best to think of it more as a characteristic function here. What is important is defining it. Instead of having strings code nondeterministic Turing machines, it will be easier this time to let $\{N_i\}_{i \in \omega}$ enumerate the set, in such a way that all nondeterministic machines occur infinitely often in the list. We assume without loss of generality that there are exactly two nondeterministic choices to be made at any vertex of the configuration graph of $N_i$, for any $i$.
+	\par The 'function' $D$ will only be nonzero for inputs $1^n$, i.e. strings of $1$'s of length $n$. To determine if $D(1^n)=1$, we do the following. Let $i \in \omega$ be such that $n \in (h(i),h(i+1]$. With this $i$ determined, we have two cases. First, the case that $n < h(i+1)$. In this case, have a deterministic Turing machine write out $g(n)$ on an 'alarm clock' string, and then proceed to simulate $N_i(1^{n+1})$ with a deterministic Turing machine, by guessing it's way along computational paths. If the path turns out to be of length greater than $g(n)$, it stops the search early, and moves onto the next path. If it finds an accepting path of length less than or equal to $g(n)$, then the machine halts and accepts, i.e. outputs $1$. Otherwise, if either all paths are either rejecting or length longer than $g(n)$, it rejects (i.e. outputs $1$). Note that this \textit{doesn't correspond to a diagonal step. We are not inverting what $N_i{1^{n+1}}$ does.}
+	\par The more important case is the one in which $n = h(i+1) = 2^{g(h(i))}$. In this case, we do the same thing - simulate $N_i(1^{n+1})$ for paths of length $g(n)$, except this time we invert the answer. I.e. we accept when there are no accepting paths of length less than or equal to $g(n)$, and reject if such a path exists. 
+\end{proof}
+\par Let us turn directly towards nondeterminism for a moment. We've seen that the power of nondeterminism is essentially equivalent to the power of guessing. When can guessing help to solve a problem? The answer is that it can help when guesses can be efficiently verified. This leads to an alternative characterization of \textbf{NP}. 
+\begin{definition}
+    We say that a relation $R \subseteq \Sigma^{\#} \times \Sigma^{\#}$ is \textbf{polynomial decidable} if there is a deterministic Turing machine which decides the language $\{x;y: (x,y) \in R\}$ in polynomial time. (Here and for the rest of these notes $x;y$ denotes the concatenation of the strings $x$ and $y$.) If you want to, you can call this set the \textbf{syntactic representation} of the relation R, which is a term I made up, but it will prove much more productive to abuse the definition somewhat and say simply that the Turing machine decides $R$ itself in polynomial time, and write that $R \in \textbf{P}$. Next, we say that $R$ is \textbf{polynomially balanced} if there exists a positive integer $k$ such that $(x,y) \in R \Rightarrow |y| \leq |x|^k$.
+\end{definition}
+\begin{theorem} 
+    A language $L \in \textbf{NP}$ iff there exists a polynomially balanced binary relation $R \in \textbf{P}$ such that 
+    \begin{align}
+        L = \{x: \exists y (x,y) \in R \}
+    \end{align}
+    That is to say, the class \textbf{NP} is precisely the class of language where 'yes' instances have efficiently verifiable 'receipts'.
+\end{theorem}
+\begin{proof}
+    Let $L$ be a language and suppose there exists a polynomially balanced binary relation $R \in \textbf{P}$ such that $x \in L$ iff there exists a $y$ with $(x,y) \in R$. Let $M$ be the deterministic Turing machine which decides $R$, in time $n^k_1$, and let $k_2$ be the integer such that $(x,y) \in R \Rightarrow |y| \leq |x|^{k_2}$. We can easily use this to define a nondeterministic Turing machine $N$ which decides $R$. As the first step of the computation on the input $x$, the machine simply guesses a string $y$ of length $\leq |x|^{k_2}$. By our assumption that $R$ is polynomially balanced, the machine only needs to guess a finite number of strings to ensure that it will find a receipt in the case that there is one. After this first guess, $N$ simply simulates the deterministic machine $M$ on the input $(x,y)$, accepting or rejecting based on the decision of $M$. Since $M$ is being run on a string of length $\leq |x|^{k_2+1}$, the computation paths will have length $\leq (|x|^{k_2+1})^{k_1} = |x|^{k_2(k_1+1)}$, so paths are polynomial length. Thus $L \in \textbf{NP}$. 
+    \par Conversely, let $L \in \textbf{NP}$, and let $N$ be a nondeterministic machine deciding $L$ in time $n^k$ for some $k$. Note that for any input $x$, the configurations of $G_x$ can be seen as strings of length $O(|x|^k)$. This is because in polynomial time we can only possibly fill up polynomially many tape with non-blank symbols. Thus, a computational path can be seen as a $O(|x|^k)$-tuple of configurations, which is of course itself a string of length polynomial in $x$. Using this, we define as the receipts/certificates \textit{the computational paths themselves}, viewed as strings in the way we described. That is, we define the relation $R$ by
+    \begin{align}
+        (x,y) \in R \iff \textrm{$y$ encodes an accepting computational path in $G_x$ for the Turing machine N}
+    \end{align}
+    Clearly then, $x \in L$ iff there exists a string $y$ with $(x,y) \in R$, and $R$ is polynomially balanced. It is also clear that $R$ is decidable in polynomial time - just define a deterministic Turing machine which has the transition function of $N$ written on some ancillary string, which given the input $(x,y)$ generates the initial configuration $c_x$, and checks one at a time to make sure that the next configuration in $y$ (viewed as a tuple), is reachable in one step by consultation of the transition function. 
+\end{proof}
+This equivalent characterization of the class makes many computational problems very natural to see as belonging to \textbf{NP}. For example, FACTORING $\in \textbf{NP}$, because if a number has a nontrivial factor, then that factor itself acts as an efficient receipt - given an $x$ and a supposed factor $y$, we need only add $y$ to itself until either the number exceeds $x$ or equals it. Another important example is the following problem:
+\begin{problem}
+    The graph isomorphism problem:
+    \begin{center}
+        GRAPH-ISOMORPHISM - Given a two graphs $G_1$ and $G_2$, are they isomorphic?
+    \end{center}
+\end{problem}
+This problem is clearly in $\textbf{NP}$, since the possible isomorphisms themselves naturally act as the certificates. 
+\subsection{Function Problems}
+\par Complexity theory primarily focuses on decision problems, because they are simpler, but we need to make sure that we aren't losing any details in deciding to focus this way. To this end we define function problems as follows:
+\begin{definition}
+    Let $L \in \textbf{NP}$. By the above equivalence, there is then a polynomially balanced, polynomially decidable relation $R_L$ such that for all strings $x$, $x \in L$ iff there exists a $y$ with $(x,y) \in R_L$. We define the \textbf{function problem associated with $L$}, denoted F$L$, as follows:
+    \begin{center}
+        Given a string $x$, what strings $y$ have the property that $(x,y) \in R_L$?
+    \end{center}
+    We say that a Turing machine \textbf{decides} the function problem F$L$ if, when started on the input $x$, always outputs such a string $y$ if one exists, and halts in acceptance, and halts in rejection otherwise. We define the class of function problems associated with languages in \textbf{NP} as \textbf{FNP}. The subclass of function problems which are decidable in polynomial time as defined above is called \textbf{FP}.
+\end{definition}
+So all problems in \textbf{NP} naturally have function variants, which always turn out to be what we would want them to be. To have a machine decide F$SAT$, for instance, is to have a machine return a satisfying truth assignment, if one exists, and reject otherwise. To decide F$FACTORING$ is to output a nontrivial factor, if one exists, and so forth. Note that in the pursuit of clean theory, we are slightly betraying the notion of a function - while a machine deciding a function problem only returns a single output, there could be multiple outputs to choose from. This is actually a good thing, since it expands the landscape of computational problems being discussed, but makes the terminology a bit of a lie - we should really call these relation problems and not function problems.
+\subsection{Completeness, Reductions, and Complements}
+The REACH problem from the last section seems extremely important, specifically towards the class \textbf{NL}. It seems to in some sense represent the entire class. In this section we make that precise. We begin by returning to the classes \textbf{R} and \textbf{RE}, for inspiration.
+\begin{definition}
+    Let $L_1$ and $L_2$ be languages. We say that $f:\Sigma^* \to \Sigma^*$ is a \textbf{reduction} from $L_1$ to $L_2$, and write $L_1 \leq L_2$, if for all input strings $x$, 
+    \[ x\in L_1 \iff f(x) \in L_2 \]
+    Let \textbf{C} is a class of languages such that \textbf{R} $\subseteq$ \textbf{C}. Then we say that a language $L$ is \textbf{C-hard} if for all $L' \in \textbf{C}$, $L' \leq L$. If a \textbf{C}-hard language $L$ is itself a member of \textbf{C}, then we say that $L$ is \textbf{C}-complete. 
+\end{definition}
+Back when we were considering the classes \textbf{R} and \textbf{RE}, our central concern was simply what was and was not computable, with no consideration for feasibility. Anything already known to be recursive was, from the standpoint of that conversation, easy. Suppose we have two languages, $L_1$ and $L_2$, neither known to be recursive or even recursively enumerable for that matter, and suppose we have that $L_1 \leq L_2$, via a recursive function $f$. What we have then is that if $L_2$ \textit{were} recursive, then so too would be $L_1$, by way of the reduction $f$ - for an input $x$, simply compute $f(x)$, and then decide if $f(x) \in L_2$. In that sense, $L_2$ is \textit{at least as hard} as $L_1$. Note that by this definition, we proved earlier that the halting problem $HALTING$ was \textbf{RE}-complete - it is among the hardest problems in \textbf{RE}, as an algorithm for \textbf{RE} would implicitly define an algorithm for every other problem in the class. In this way, $HALTING$ was seen to be representative of the maximal capabilities of the class \textbf{RE} - an iconic example capturing the essence of what we are really talking about when we think of the class. To understand $HALTING$ is to understand \textbf{RE}.
+\par We would like to also discuss hardness of problems within \textbf{R}, and for this, simply requiring $f$ to be recursive won't do - under this definition, every problem in \textbf{R} would be exactly as hard as every other problem. What has changed is our notion of easy. What is easy is no longer what is simply computable, but what is efficiently computable, and our definition of reduction needs to reflect this. In fact, we will give two definitions, one stronger than the other. 
+\begin{definition}
+Let $L_1$, $L_2$ be languages. We say that a function $f:\Sigma^* \to \Sigma^*$ is a \textbf{polynomial-time reduction} from $L_1$ to $L_2$ and write $L_1 \leq_p L_2$, if $f$ is computable in polynomial space, and 
+\[x \in L_1 \iff f(x) \in L_2 \]
+A \textbf{log-space reduction} follows the same definition, except that the function $f$ is required to be computable in logarithmic-space. \\
+Let \textbf{C} $\subseteq \textbf{R}$ be a complexity class. We say that a language L is \textbf{C-hard} if, for all languages $L' \in \textbf{C}$, L' is reducible to L. (The type of reducibility will be clear from context, see below.) If a \textbf{C}-hard language is itself in \textbf{C}, then we say that L is \textbf{C-complete}.
+\end{definition}
+Thus, our notion of an 'easy computation' is either going to be 'computable in polynomial time', or 'computable in logarithmic space', depending on context. Note that since \textbf{L} $\subseteq$ \textbf{P}, $L_1 \leq_l L_2 \Rightarrow L_2 \leq_p L_2$, but the converse will remain an open question as long as the properness of that containment remains unknown (likely longer). Because log-space reducibility is a stronger condition than polynomial time reducibility, we will be considering these exclusively unless otherwise noted. From here on, when we say that $L_1$ is reducible to $L_2$, one should take that to mean reducible in the log-space sense.
+\par Our first example of a complete problem shouldn't come as a huge surprise:
+\begin{theorem}
+REACH is \textbf{NL}-complete.
+\end{theorem}
+\begin{proof}
+Let $L \in \textbf{NL}$, and let N be a nondeterministic Turing machine which decides L in space $\log(n)$. The reduction from L to REACH is simply the mapping from an input to it's configuration graph, $x \mapsto G_x$. This map is easily computable in logarithmic space: (Remember, the output string, which would indeed be polynomial length, does not count as space use.) Simply have a read-only ancillary string of constant length containing the transition function of N, print configurations on a work tape (which will be strings of logarithmic length), and then record edges from this configuration onto the output tape by consulting the transition function tape and printing the resulting configurations. Once all choices have been exhausted, erase both cells with configurations, and lexicographically move on to the next one. (To make sure our graph conforms to the REACH problem in its exactness, we would need to also make sure that any accepting configuration is thought of as 'the same', and recorded on the output string as the highest indexed node.) Clearly by our definition of a nondetermistic Turing machine deciding a language, the accepting configuration is reachable from $c_x$ iff $x \in L$.
+\end{proof}
+This is a good time to demonstrate how complete problems are useful as tools to prove facts about complexity classes. \textit{Complete problems are the least likely problems to be in any classes contained within.} To see this, suppose REACH $\in$ \textbf{L}. Then in logarithmic space, we could reduce any problem in \textbf{NL} to REACH, and then compute that problem in logarithmic space, thus showing that \textbf{NL} $\subseteq$ \textbf{L} $\Rightarrow$ \textbf{L} $=$ \textbf{NL}. If we think that \textbf{NL} and \textbf{L} are the different, then REACH \textit{can't} be in \textbf{L}. To summarize,
+\begin{fact}
+    $REACH \in \textbf{L} \iff \textbf{L} = \textbf{NL}$
+\end{fact}
+REACH is an extremely important problem, but the most important problem in complexity theory is
+\begin{problem} The problem of Boolean satisfiability:
+\begin{center}
+    $SAT$: Given a Boolean expression in conjunctive normal form, is it satisfiable?
+\end{center}
+\end{problem}
+As we showed in the beginning, any Boolean expression is equivalent to an expression in CNF, but to truly assume WLOG that all inputs are in CNF, without worry about having lost any of the computational details of the problem in general, we need to make sure that we can perform the conversion \textit{efficiently}. Unfortunately, the algorithm implicit to our original proof is not good enough. Consider for instance the following formula:
+\begin{align}
+    (x_1\wedge y_1) \vee (x_2 \wedge y_2) \vee ... \vee (x_n \wedge y_n)
+\end{align}
+Looking back to the original proof, one can see that converting this to a CNF formula involves looking at each implicant as it's own CNF formula, with 2 clauses each, and then taking as our global CNF formula the conjunction of all $2^n$ clauses which contain $m$ $x_i$ terms and $n-m$ $y_i$ terms. Thus, our conversion is not at all efficient!
+\par So how do we get away with this standardization of the problem? The key is noting that we don't need an expression which is necessarily \textit{equivalent}. We just need an expression which is satisfiable if and only if the original expression is. Given a Boolean expression $\phi$, we can define a new expression $\psi$ which will have more Boolean variables than $\phi$, but will still be satisfiable if and only if $\psi$ is. Since $\psi$ has more Boolean variables than $\phi$, no truth assignments for $\psi$ will be appropriate for $\phi$. In technical terms, these expressions will be \textit{equisatisfiable} but not \textit{equivalent}. 
+\par Consider the problematic expression above. The efficient sized equisatisfiable expression is created by introducing a new Boolean variable $z_i$ for each clause.
+\begin{align}
+    (z_1 \vee z_2 \vee ... \vee z_n) \wedge (\neg z_1 \vee x_1) \wedge (\neg z_1 \vee y_1) \wedge (\neg z_2 \vee x_2) \wedge (\neg z_2 \vee y_2) \wedge ... \wedge (\neg z_n \vee x_n) \wedge (\neg z_n \vee y_n)
+\end{align}
+Suppose this expression is satisfied by a truth assignment. Then at least one of the $z_i$ variables has to be true. But if one of the $z_i$ is true, then of course $\neg z_i$ is false, so then by the other two clauses associated with it, both $x_i$ and $y_i$ both must be true, and therefore the restriction of this satisfying truth assignment to the set of x and y variables will end up satisfying expression (14). Conversely, if (14) is satisfied, then we can extend this expression to the $z$ variables by letting $z_i$ be true if both $x_i$ and $y_i$ are true, for each i. This forces at least one of the $z_i$ variables to be true, and also makes sure that none of the other clauses are false, and thus we have that this extension satisfies (15). It should be clear that this leads naturally to a log-space reduction from the 'genera' SAT problem (the one in which inputs are not necessarily assumed in CNF) to the SAT problem as we've defined it. Thus, there is no loss in complexity theoretic detail to assume that all inputs to the SAT problem are assumed in CNF. 
+\par It's worth noting that no such reduction is known to exist for finding equisatisfiable DNF expressions. If one were known, however, then the SAT problem would be extremely easy! Deciding the satisfiability of a DNF expression can in fact be done in linear time $O(n)$. Simply scan through each implicant of the input, checking to see for each one if there exists a literal whose negation also appears in the same implicant. If we find any implicant for which this is not the case, than any truth assignment which satisfies the literals of that implicant will satisfy the whole expression, so we accept. Otherwise, we reject. We will assume from here on that all inputs to $SAT$ are in CNF.
+\par This assumed form for the input allows us to further restrict the set of expressions which we are allowed to input. Consider the following (seemingly) simpler version of SAT:
+\begin{problem} 
+k-SAT: Given a Boolean expression $\phi$ in conjunctive normal form, such that all clauses have at most k literals, is $\phi$ satisfiable?
+\end{problem}
+It turns out that 3SAT is as complicated as the SAT problem gets:
+\begin{fact}
+    SAT is reducible to 3SAT. 
+\end{fact}
+\begin{proof}
+    Let $\phi$ be an input to SAT. That is to say, an expression in CNF, but where each clause is allowed to have any number of literals. Our algorithm works it's way through the input, clause by clause. Clauses which already have three or less literals are left alone. Suppose we encounter the clause $C=(l_1 \vee l_2 \vee ... \vee l_k)$, where $k>3$, and for each i, $l_i = x_i$ or $l_i = \neg x_i$ for some Boolean variable $x_i$. We define $k-3$ new Boolean variables $z_1, z_2,...,z_{k-3}$, and replace C in $\phi$ with the following conjunction of clauses:
+    \begin{align}
+        (l_1 \vee l_2 \vee z_1) \wedge (l_3 \vee \neg z_1 \vee z_2) \wedge (l_4 \vee \neg z_2 \vee z_3) \wedge ... \wedge (l_{k-2} \vee \neg z_{k-4} \vee z_{k-3}) \wedge (l_{k-1} \vee l_k \vee \neg z_{k-3})
+    \end{align}
+    Call this subexpression $\psi$. Suppose there is a satisfying assignment of the variables $x_1,...,x_k$ the original clause $C$. In this case, we extend the assignment to $\psi$ as follows: If $l_1$ or $l_2$ are true, we set \textit{all} of the $z_i$ to be false. This clearly works. If $l_{k-1}$ or $l_k$ are true, then we set \textit{all} of the $z_i$ to be true. This also clearly works. Here's the tricky part: If $l_j$ is true where $j \neq 1,2,k-1$ or $k$, then we set all of the $z_i$ up to and including $j-2$ to be true, and the rest to be false. A moments thought reveals that this also works to satisfy $\psi$. Conversely, suppose that $C$ is not satisfiable. Then it is just as plain to see that since for any truth assignment appropriate to $C$, none of the $l_i$ are true, and each clause of $\psi$ has at least one of these literals, so regardless of how we decide to assign truth to the $z_i$'s, $\psi$ cannot be satisfied. Thus $\psi$ is satisfiable iff $C$ is satisfiable. It is clear then that our algorithm produces a 3CNF formula which is satisfiable iff $\phi$ is satisfiable. It is also clear that our algorithm works in logarithmic space, since all it needs to be able to do is count the number of literals in each clause, which can easily be done in logarithmic space. 
+\end{proof}
+Clearly also 3SAT is 'reducible' to SAT, under the identity reduction! Thus these problems are equivalent, and from here on we will regard to these problems as the same, and refer to them interchangeably. Next we note the following:
+\begin{fact}
+    SAT $\in$ \textbf{NP}
+\end{fact}
+\begin{proof}
+    For any Boolean expression $\phi$, we of course have as input some string in some alphabet $x$ which has length $|x| := n$, and so the expression involves $O(n)$ Boolean variables. Thus we can specify any truth assignment with a string which is $O(n)$ bits long. Our nondeterministic Turing machine N first guesses a string of this many bits (it can deterministically count the exact number first if necessary). Upon any guess we have N proceed to deterministically determine the value of the expression under this truth assignment. The inductive definition of what it means for a truth assignment to satisfy an expression spells out a deterministic algorithm for this, in polynomial time. (it could be higher than linear, depending on the number of subexpressions, but it is still clearly polynomial) If the expression ends up true under a specific guess, we have the machine terminate in an accept state, else it rejects. Clearly this machine decides SAT. 
+\end{proof}
+Next we define the Boolean circuit variant of SAT:
+\begin{problem}
+    CIRCUIT-SAT: Given a Boolean circuit C, is it satisfiable?
+\end{problem}
+Given a Boolean expression $\phi$, we can easily in logarithmic space produce a Boolean circuit which is satisfiable iff $\phi$ is satisfiable: First, we determine the number of gates which we need by counting the number of symbols in our input, ignoring parentheses. After that, we inductively 'work downward'. Beginning at n, the number we've counted to, if $\phi = \neg \psi$, we make gate n a not gate, i.e. set $s(n)=\neg$. Similarly if we start out with $\phi = (\psi_1 \wedge \psi_2)$, we make gate n an and gate, i.e. set $s(n)= \wedge$, and the same for $\vee$. In the not gate case, whatever our next action is we make sure to create an edge from the next gate to gate n, and similar for $\wedge$ and $\vee$, and so forth. Thus SAT reduces to CIRCUIT-SAT.
+\par The other direction is slightly less trivial. Boolean circuits seem at a glance to be a bit more descriptive than Boolean expressions. For one thing, they regard the conjunctions and negations of the expression as objects of computational interest rather than just symbols. They also allow for constants in place of Boolean variables, which not only adds descriptive power but allows us to convert one circuit into another which in some sense represents the result of fixing a truth assignment. This allows us to define another important problem which seems very different as a special case of problem 5:
+\begin{problem}
+    CIRCUIT-VALUE: Given a Boolean circuit C \textit{such that no gates are of the Boolean variable sort} (i.e. if i has indigree 0 then $s(i) \in \{0,1\})$, is it satisfiable?
+\end{problem}
+Thus the extra descriptive power of Boolean circuits allows us to view the problem of \textit{deciding the output of a circuit} as just the original problem with a restricted set of inputs. The analogous problem of deciding the value of a Boolean expression given a fixed truth assignment, which we might call SAT-VALUE, can't be viewed this way - at least, not the way we've laid out our definitions - and hence we won't bother defining that problem formally. It should come as no surprise, assuming CIRCUIT-SAT and SAT are truly equivalent as we're about to show, that CIRCUIT-VALUE and SAT-VALUE are equivalent problems as well.
+\begin{fact}
+    CIRCUIT-SAT is reducible to SAT
+\end{fact}
+\begin{proof}
+    Let C be a circuit with $X(C) = \{x_1,...,x_n\}$. The idea is to create an expression which involves this set, but also creates a new Boolean variable $g$ for every gate of the circuit (including the variables gates!)  (need to finish)
+\end{proof}
+We are now ready to begin proving 'the fundamental theorem' of complexity theory - that SAT is \textbf{NP}-complete. In the proof we will actually show that CIRCUIT-SAT is \textbf{NP}-complete. We just showed that instances of CIRCUIT-SAT can be reduced to instances of SAT, but in order to use the result, we first need to make sure that the composition of reductions is a reduction.
+\begin{lemma}
+    If $f_1$ is a reduction from $L_1$ to $L_2$, and $f_2$ is a reduction from $L_2$ to $L_3$, then $f_2 \circ f_1$ is a reduction from $L_1$ to $L_3$. 
+\end{lemma}
+\begin{proof}
+    Of course it is trivial that $f_2 \circ f_1$ has the property that $x \in L_1 \iff f_2(f_1(x)) \in L_3$. The nontrivial part is showing that this composition can be computed in logarithmic space. Even this might at first seem trivial - If $f_1$ is computable in logarithmic space, then it is computable in polynomial time, and in polynomial time we cannot possibly produce larger than a polynomial sized output, say of worst case size $c|x|^k$. Then, feeding this as input to the second machine, we would need space $O(\log(c|x|^k)=O(\log(c)+k\log(|x|))=O(\log(|x|)$. Seems perfectly fine, right?
+    \par There is an issue with this reasoning though - Where do we store the intermediate, polynomial sized output $f_1(x)$? We certainly can't store it on the read only input tape, nor can we temporarily store it on the write only output tape. (Recall, the cursor of the output string can only move in one direction, so we cannot double back to erase.) Thus, we need a way to perform the computation for $f_2$ without explicitly writing the output $f_1(x)$ anywhere on the work tape. How can we do this?
+    \par What we \textit{can} afford to keep track of is the cursor position of the first output string $f_1(x)$. That is to say, we will begin the computation by simulating steps of the turing machine for $f_2$, call it $M_2$, while also maintaining a binary number indexing where the simulated machine \textit{thinks} it's cursor would be pointing on the input string (if we had one). Initially, of course, $i=1$. And, luckily, we can at least be sure that the first symbol on the input tape for $M_2$ is $\triangleright$.
+    \par At each step of $M_2$, we must either increment or decrement $i$, moving to a new symbol on the output string for $f_1$, which we don't actually have. However, \textit{for the current step of $M_2$'s computation}, we only need a single symbol of the output $f_1(x)$, - the one at index i. Thus, every step of the computation of $M_2$, we will pause, and run the machine $M_1$ long enough to produce the $i^{th}$ symbol that $M_2$ thinks it's looking at. That's right - we just start the machine $M_1$ all over again, every step of $M_2$. It will take forever, but it is clear to see that this will only ever use logarithmic space, and produce the desired outcome.
+\end{proof}
+The main event of the proof is the following theorem:
+\begin{theorem}
+    CIRCUIT-VALUE is \textbf{P}-complete
+\end{theorem}
+\begin{proof}
+Fill in
+\end{proof}
+The above fact is every bit as insightful as the fact we're about to conclude with. Computing the value of a circuit seems platonically as the general form of a 'robotic thing to do', almost classical as an algorithm. When we think of a machine blindly following the instructions it was programmed with, we think of CIRCUIT-VALUE, and the above theorem confirms that all problems which are 'efficiently solvable' can indeed be looked at this way. There is no insight required to solve the CIRCUIT-VALUE problem, nor is there any approximation of insight (blind guessing). There is only cold, robotic motion. This is \textbf{P}. 
+\begin{theorem}
+    CIRCUIT-SAT is \textbf{NP}-complete
+\end{theorem}
+\begin{proof}
+Fill in
+\end{proof}
+\begin{corollary}[Cook-Levin Theorem]
+    SAT is \textbf{NP}-complete
+\end{corollary}
+\begin{proof}
+Let $f_1$ be the reduction from an arbitrary \textbf{NP} language L to CIRCUIT-SAT, and $f_2$ be the reduction from CIRCUIT-SAT to SAT. Then, since the composition of reductions is a reduction, $f_2 \circ f_1$ is a reduction from L to SAT. 
+\end{proof}
+Next we define the notion of a complementary class.
+\begin{definition}
+    For any complexity class \textbf{C}, define the class \textbf{coC} to be the collection of all languages $L$ such that $L^c \in \textbf{C}$. 
+\end{definition}
+The meaning and value of these complementary classes varies quite a bit depending on the class in question. For the deterministic classes, this notion is in fact worthless:
+\begin{fact}
+All deterministic time and space classes are self dual. That is, for any function $f:\mathbb{N} \to \mathbb{R}$, \textbf{TIME$(f(n))$} = \textbf{coTIME$(f(n))$}, and  \textbf{SPACE$(f(n))$} = \textbf{coSPACE$(f(n))$}
+\end{fact}
+\begin{proof}
+    This comes down to our definition of decidability. If $L$ is decidable in some amount of time or space by a deterministic Turing machine M, then we can decide if $x \in L^c$ by having a Turing machine simulate M(x) in that amount of time or space, and then simply accept if M rejects, and reject if M accepts. 
+\end{proof}
+Thus, \textbf{L} = \textbf{coL}, \textbf{P} = \textbf{coP}, and \textbf{EXP} = \textbf{coEXP}, among others. For the nondeterministic classes however, the complementary classes represent an entire alternate universe in which we used a completely different definition of what it means to accept an input. Recall that a nondeterministic machine M accepts an input x if \textit{there exists} an accepting computational path. To say then that we have a nondeterministic machine which decides the complement of a language L is to say that we have a machine which, if $x \in L$, will halt in rejection \textit{for all} computational paths. In other words, the complementary classes represent the alternate universe where instead of defining
+\begin{center}
+    N accepts x if and only if THERE EXISTS an accepting path
+\end{center}
+We instead decided to say that
+\begin{center}
+    N accepts x if and only if ALL paths are accepting
+\end{center}
+That is the 'alternative definition' interpretation of the complementary complexity classes. The other definition is the simpler one: Where 
+What is the flavor of \textbf{NP} in this alternate universe? The following problem gives us a strong sense of this:
+\begin{problem} The Boolean validity problem:
+\begin{center}
+    VALIDITY: Given a Boolean expression $\phi$ in conjunctive normal form, is it valid? That is to say, does every possible truth assignment satisfy $\phi$?
+\end{center}
+\end{problem}
+This problem is clearly in co\textbf{NP}, as it's (almost) the complement is the SAT problem! Suppose $\phi$ is not satisfiable. Then, as we pointed out earlier, this would mean that its negation $\neg \phi$ is valid! Thus, $\phi$ is valid iff $\neg \phi$ is unsatisfiable iff $\neg \phi \in SAT^c$. Thus, VALIDITY $=\{\neg \phi: \phi \in SAT^c\}$ i.e. the set of all strings in $SAT^c$ which have had negation symbols tacked on. This is of course doable and reversible in logarithmic space, so these two problems are equivalent.
+\begin{fact}
+    A language $L$ is \textbf{C}-complete iff $L^c$ is \textbf{coC} complete.
+\end{fact}
+\begin{proof}
+    Let $L' \in$ \textbf{coC}. Then of course $L'^c \in$ \textbf{C}, so there exists a reduction $f$ from $L'$ to $L$, where $L$ is \textbf{C}-complete. Note then that $x \in L'^c \iff f(x) \in L$, so $x \in L' \iff f(x) \in L^c$. Thus in fact the exact same reduction works to show that $L^c$ is \textbf{coC} complete. An identical argument shows the other direction.
+\end{proof}
+Thus we have that $SAT^c$ is \textbf{coNP} complete, and so trivially we also have the corollary:
+\begin{corollary}
+    VALIDITY is \textbf{coNP} complete.
+\end{corollary}
+Next, consider the implications of our 'certificates' definition of \textbf{NP} on \textbf{coNP}. There are two ways to think about it, both useful. If $L \in \textbf{coNP}$, then $L^c \in \textbf{NP}$, meaning that $L \in \textbf{coNP}$ iff inputs not in the language have succint and efficiently verifiable \textit{disqualifications}. $VALIDITY$ is a perfect example - a succint disqualification that $\phi \in VALIDITY$ would be a truth assignment which doesn't satisfy it. 
+\par The second way to think about it: If $L^c \in \textbf{NP}$, then the polynomially balanced relation $R' \in \textbf{P}$ can itself be complemented to yield a relation $R := R'^c$ such that
+\[x \in L \iff x \notin L^c \iff \neg(\exists y(|y| \leq |x|^k \wedge (x,y) \in R')
+    \iff \forall y(|y| \geq |x|^k \vee (x,y) \notin R')\]
+This leads us to our dual definition of \textbf{coNP}, which we will line up with the old definition of \textbf{NP} for comparison and dramatic effect:
+\begin{center}
+    $L \in \textbf{NP}$ iff there exists a binary relation $R \in \textbf{P}$, and an integer $k>0$, such that
+    \begin{align}
+        L = \{x: \exists y \textrm{ with } |y| \leq |x|^k, (x,y) \in R \}
+    \end{align}
+    $L \in \textbf{coNP}$ iff there exists a binary relation $R \in \textbf{P}$, and an integer $k>0$, such that
+    \begin{align}
+        L = \{x: \forall y \textrm{ with } |y| \leq |x|^k, (x,y) \in R \} 
+    \end{align}
+\end{center}
+Note that there are some very conspicuous asymmetries between \textbf{coNP} and \textbf{NP} when trying to view them as analogous to \textbf{RE} and \textbf{coRE}. In one sense, \textbf{NP} is the 'efficiency' analog of \textbf{RE}: Where \textbf{RE} is the class of problems for which 'yes' answers are \textit{eventually} confirmed, \textbf{NP} is the class of problems for which yes answers \textit{can be efficiently confirmed}. The same analogy for \textbf{coRE} and \textbf{coNP} exists with no answers. However, there is a serious wrinkle to the analogy. Recall that FO-VALIDITY was \textbf{RE}-complete, yet in the efficiency world, the Boolean VALIDITY problem belongs to the complementary class! It would seem as if VALIDITY and SATISFIABILITY have \textit{swapped}. 
+\par And besides that, there is yet another wrinkle. It was clear before that \textbf{RE} $\cap$ \textbf{coRE} $ = \textbf{R}$. By analogy it should also be obvious that $\textbf{NP} \cap \textbf{coNP} = \textbf{P}$, right?
+\par Unfortunately, this is not at all obvious! Suppose a language $L \in \textbf{NP} \cap \textbf{coNP}$. Then we have efficiently verifiable certificates for what the answer is, whether it be yes or no. This is a valuable property for a problem to have, but we still need some kind of wizard to provide us with the certificates! So, $\textbf{coNP} \cap \textbf{NP}$ is, at least for now, it's own beast entirely - critical to the theory, valuable in practicality, but by no means obviously equal to anything else we've yet seen.
+%Talk about the primes problem, which I don't understand how is different from FACTORING^c%
+
