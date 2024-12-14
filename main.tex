@@ -24,7 +24,7 @@
 \usepackage{bm}
 
 \usepackage{biblatex}
-\addbibresource{library.bib}
+\addbibresource{bibliography.bib}
 
 % Makes table of contents links clickable in pdf readers
 \usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue]{hyperref}
@@ -82,7 +82,8 @@
 
 \tableofcontents
 
-% \part{Models of Computation}
+\newpage
+\part{Logic and Computability}
 
 \include{sections/turing-machines}
 \include{sections/semicomputability}
@@ -90,6 +91,9 @@
 \include{sections/ackerman}
 \include{sections/first-order-logic}
 \include{sections/arithmetic}
+
+\part{Complexity Theory}
+
 \include{sections/measures-of-complexity}
 \include{sections/time-space-nondeterminism}
 \include{sections/complexity-classes-in-general}

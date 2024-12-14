@@ -1,4 +1,5 @@
 \section{Boolean Circuits}
+\subsection{Circuit Complexity Classes and Their Relationships}
 \begin{definition}
 	An \textbf{n-input Boolean circuit} is a directed acyclic graph with n \textbf{sources} (vertices with no incoming edges) and one \textbf{sink} (vertex with no outgoing edges). Non-source vertices are called \textbf{gates}, and each gate has an associated type. There are three types, denoted $\wedge$, $\vee$, and $\neg$. The \textbf{fan-in} or \textbf{width} of a gate is the number of incoming edges, and the number of outgoing edges is called the \textbf{fan-out}. Not gates (those whose type is $\neg$) are required to have fan-in and fan-out $1$. The \textbf{size} of a circuit $C$, denoted $|C|$, is the number of vertices in the graph. The \textbf{depth} of a circuit is the shortest distance from a sink to one of it's sources. \par 
 	We next define the \textbf{output} of an  n-input circuit $C$ on an \textbf{input} $x \in \{0,1\}^n$, which we denote $C(x)$. To do this, we define recursively the function $val(v)$ where $v$ is a vertex. We assume an ordering to the sources. For a source vertex $v$, let $val(v)$ be the corresponding bit-value of $x$. If $v$ is a not gate, let $val(v)$ be $\bar{val(v')}$, where $v'$ is the single vertex whose outgoing edge enters $v$. If $v$ is an and gate, let $val(v) = \bigwedge val(v_i)$ i.e. the the conjunction over all $val(v')$s with $v'$ leading to $v$. Similar for or gates. Finally let $C(x) = val(v)$ where $v$ is the sink. \par 
@@ -91,7 +92,7 @@ Since $REACH$ is $\bm{NL}$-complete, we immediately have also that
 \end{corollary}
 Of course, since $CIRCUITVALUE$ is in $\bm{P}$, the log-space uniformity condition for $\bm{AC}$ and $\bm{NC}$ immediately implies that both are subsets of $\bm{P}$. Thus we have established the following chain:
 \[ \bm{AC}_0 \subseteq \bm{NC}_1 \subseteq \bm{L} \subseteq \bm{NL} \subseteq \bm{AC}_1 \subseteq \bm{NC}_2 \subseteq \ldots \subseteq \bm{AC} = \bm{NC} \subseteq \bm{P} \]
-\section{Parity}
+\subsection{The Parity Problem and the Switching Lemma}
 We proceed to embark on the long process of showing that the parity function not only isn't in $\bm{AC}^0$, i.e. cannot be computed by constant depth circuit families of polynomial size, but in fact cannot even be computed by constant depth circuit families of quasipolynomial size. This stronger result is necessary to construct an oracle separation of $\bm{PH}$ from $\bm{PSPACE}$. We require some notation and definitions.
 \begin{definition}
 	Let $C$ be an $n$ input circuit, or alternatively a Boolean function (the following definition can be applied to either). A \textbf{restriction} is a partial mapping $\rho: A \subseteq \{0,1\}^n \to \{0,1,*\}$ - i.e. a fixing of some inputs as $1$'s, some as $0$'s, and others left alone. Those mapped to $*$ are seen as being let alone. For a fixed $n$, denote $\mathcal{R}_t$ to be the set of restrictions of $t$ many variables (leaving $n-t$ many $*$'s). We denote the restricted circuit $C \restriction \rho$. We call two restrictions $\rho$ and $\sigma$ on $n$ variables \textbf{disjoint} if they restrict a disjoint set of variables to literals. In this case, if $\rho$ restricts $k$ many variables and $\sigma$ restricts $l$ many variables, then the composition $\rho \circ \sigma := \rho\sigma$ is a restriction in $\mathcal{R}_{k+l}$. \par 
@@ -268,7 +269,7 @@ Thus this is a parity circuit that cannot exist by the above corollary. Of cours
 	$\bm{AC}^0 \neq \bm{NC}^1$.
 \end{corollary}
 The nonexistence of quasipolynomial circuits for parity is necessary for the construction of an oracle separating $\bm{PSPACE}$ from $\bm{PH}$. 
-\section{Oracle Separation of PH from PSPACE}
+\subsection{Payoff: Oracle Separation of PH from PSPACE}
 In this section we will construct an oracle $A$ such that $\bm{PH}^A \neq \bm{PSPACE}^A$. Our test language witnessing the separation will be 
 \[ L_A =\{1^n: \textrm{The number of strings of length $n$ in $A$ is odd}\} \]
 As is usually the case with these kinda of constructions, we can see that $L_A \in \bm{PSPACE}^A$ regardless of the details of $A$. To see this, note that for any $n$ there are at most $2^n$ strings of length $n$ in $A$, and it will take $n$ many bits to maintain a counter which goes this high. Simply query the machine for every string of length $n$, adding $1$ to the counter if the string is in $A$, then inspect the lowest place value of the counter, returning that number. \par 
