@@ -1,0 +1,58 @@
+\section{Cryptography and Function Problems}
+First, we need to do a preliminary investigation on the dual problem of 
+
+\[PRIMES = FACT^c = \textrm{"Given an integer $x$, is it prime?"}\]
+
+$FACT$ is a prototypical \textbf{NP} problem: the certificates are clear - just find a factor. The same cannot be said of $PRIMES$. What certificate could possibly verify in the affirmative that a number is prime? This requires some build up and number theory. 
+
+\begin{definition}
+    The \textbf{greatest common divisor} of $m$ and $n$ (denoted $gcd(m,n)$ or sometimes $(m,n)$) is the largest integer $k$ such that $k | m$ and $k | n$. If $gcd(m,n) = 1$, then we say that $m$ and $n$ are \textbf{relatively prime}.
+\end{definition}
+
+From this we can define the set of all numbers which are relatively prime with $n$
+\[ \Phi(n) = \{ m \leq n: gcd(m,n) = 1 \} \]
+The function $\phi(n) = |\Phi(n)|$ is sometimes called the \textbf{Euler function}. We define $\phi(1) = 1$ and note immediately that for any prime $p$, $\phi(p)=p-1$. 
+
+\begin{fact}
+    For a number $n$, define $P(n)$ to be the set of primes which divide $n$. Then we have
+    \[ \phi(n) = n\prod_{p \in P(n)} (1-\frac{1}{p}) \]
+\end{fact}
+
+\begin{proof}
+    Say we start out with the numbers $0,1,\ldots, n-1$ - these are initially all regarded as `candidates' for the set $\Phi(n)$. Let $p$ be a prime dividing $n$. Clearly then, we can remove $p$ from the running. However, we can remove more than just this. In particular, any multiple of $p$ which is less than $n$ is also not relatively prime with $n$, and there are $\frac{n}{p}$ many of these. Thus we have $i(n) \leq n-\frac{n}{p} = n(1-\frac{1}{p})$. Take another prime $p'$ which divides $n$. Thinning this set out further 
+\end{proof}
+
+\begin{definition}
+    By \textbf{function problem}, we actuallly mean relation problem. By relation problem, we mean problems of the form: For a particular binary relation $R \subseteq A \times B$, given an $x \in A$, find and return a $y$ in $B$. We can view function problems as mathematical objects by simply seeing them as the relations themselves, up to some standard encoding of the elements as strings. 
+\end{definition}
+
+\begin{definition}
+    Let $L \in \mathbf{NP}$, and let $J$ be the polynomial time relation for which certificates of $x \in L$ can be verified. Define the \textbf{function problem associated with $L$}, denoted $FL$, to be this polynomial time relation $J$. I.e. $J = FL$. More practically, the function problem is: Given an $x$, find and return a $y$ such that $(x,y) \in J$, or return `no' if there isn't one. Define $\mathbf{FNP}$ to be the set of all such function problems. Finally, define $\mathbf{FP}$ to be the restriction of this set to languages in $\mathbf{P}$.
+\end{definition}
+
+Thus, the function problem associated with $REACH$ is: Given a graph, find and return a path from $1$ to $n$. The function problem associated with $SAT$ is: Given a Boolean expression, return a satisfying truth assigment. The function problem associated with $TSP(D)$ is: Given a distance matrix for a graph and a number $l \in \mathbb{N}$, return a tour of length less than or equal to $l$. Alternatively, it is the function problem: Given a distance matrix for a graph and a number $l \in \mathbb{N}$, return a tour of length no greater than $l$.
+
+Note that neither of those function problems which could be associated with $TSP(D)$ are the actual problem $TSP$, of returning an \emph{actual} optimal tour. Consider the function problem $TSP-Cost$: Given a distance matrix, return the actual minimal cost. Also consider $EXACT TSP$: Given a distance matrix and a number $k \in \mathbb{N}$, is $k$ the actual shortest tour length? 
+
+\begin{lemma}\label{convenient}
+    $HAMILTON PATH \leq TSP(D)$, and $HAMILTON PATH \leq TSP(D)$
+\end{lemma}
+
+\begin{proof}
+    Given a graph $G = (V,E)$ with $|V| = n$, we want to know if it has a Hamilton path, i.e. a tour of all vertices. Construct a distance matrix $d_{ij}$ of $n$ nodes, just like $G$ and where $d_{ij} = 1$ if the edge $(i,j) \in E$ and $d_{ij} = 2$ otherwise. Consider the instance of TSP(D) composed of this distance matrix along with the budget $B = n$. Clearly, any tour within this budget must necessarily be entirly composed of actual edges in $G$. Therefore, if the answer is yes, then a tour must exist, and that tour is a Hamilton path. 
+
+    Moreover, clearly this same pair consisting of our distance matrix and the budget $n$ can also be considered an instance of $EXACT TSP$. The existence of a Hamilton path is also equivalent to a yes answer to this question as well, since if the answer is no then it is by construction also impossible to get anything shorter than distance $n$. 
+\end{proof}
+
+Clearly given a solution to $TSP$, i.e. an optimal tour, one could easily solve $TSP-Cost$ by adding up the lengths. Given a solution to $TSP-Cost$, i.e. an optimal tour length, one could immediately answer any instance of $EXACT TSP$ (given a graph and a number, compute TSP-Cost on it, and see if it equals that number - if it does, yes, if not, no). Finally, given a solution to $EXACT TSP$, one could immediately answer any instance of $TSP(D)$: Given a distance matrix and a number... wait, this one isn't so obvious. Luckily, we have lemma \ref{convenient} above, and know that $HAMILTON PATH$ is \textbf{NP}-complete. Since $TSP(D) \in \mathbf{NP}$, it follows that 
+
+\[ TSP(D) \leq HAMILTON PATH \leq EXACT TSP \]
+
+By transitivity of reductions it follows that $TSP(D) \leq EXACT TSP$, even though a reduction isn't immediately obvious. Thus we have
+
+\[ TSP(D) \leq EXACT TSP \leq TSP-Cost \leq TSP \]
+
+$EXACT TSP$ is a decision problem, while $TSP-Cost$ and $TSP$ are function problems. None of them are obviously in $\mathbf{NP}$. 
+
+
+
